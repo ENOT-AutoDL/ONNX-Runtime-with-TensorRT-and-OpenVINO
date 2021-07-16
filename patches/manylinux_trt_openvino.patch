@@ -1,0 +1,77 @@
+diff --git a/setup.py b/setup.py
+index fb70bda..dc61619 100644
+--- a/setup.py
++++ b/setup.py
+@@ -159,7 +159,57 @@ try:
+                     args.append(dest)
+                     if len(args) > 3:
+                         subprocess.run(args, check=True, stdout=subprocess.PIPE)
+-                    self._rewrite_ld_preload(to_preload)
++
++                dest = 'onnxruntime/capi/libonnxruntime_providers_tensorrt.so'
++                if path.isfile(dest):
++                    result = subprocess.run(['patchelf', '--print-needed', dest], check=True, stdout=subprocess.PIPE, universal_newlines=True)
++                    dependencies = [
++                        'libcublas.so',
++                        'libcublasLt.so',
++                        'libcudnn.so',
++                        'libcudart.so',
++                        'libmyelin.so',
++                        'libnvinfer_plugin.so',
++                        'libnvinfer.so',
++                        'libnvrtc.so',
++                    ]
++                    args = ['patchelf', '--debug']
++                    for line in result.stdout.split('\n'):
++                        for dependency in dependencies:
++                            if dependency in line:
++                                if not dependency in to_preload:
++                                    to_preload.append(line)
++                                args.extend(['--remove-needed', line])
++                    args.append(dest)
++                    if len(args) > 3:
++                        subprocess.run(args, check=True, stdout=subprocess.PIPE)
++
++                dest = 'onnxruntime/capi/libonnxruntime_providers_openvino.so'
++                if path.isfile(dest):
++                    result = subprocess.run(['patchelf', '--print-needed', dest], check=True, stdout=subprocess.PIPE, universal_newlines=True)
++                    dependencies = [
++                        'libtbbmalloc.so',
++                        'libinference_engine.so',
++                        'libonnx_importer.so',
++                        'libonnx_proto.so',
++                        'libtbb.so',
++                        'libinference_engine_tranformations.so',
++                        'libngraph.so',
++                        'libprotobuf.so',
++                    ]
++                    args = ['patchelf', '--debug']
++                    for line in result.stdout.split('\n'):
++                        for dependency in dependencies:
++                            if dependency in line:
++                                if not dependency in to_preload:
++                                    to_preload.append(line)
++                                args.extend(['--remove-needed', line])
++                    args.append(dest)
++                    if len(args) > 3:
++                        subprocess.run(args, check=True, stdout=subprocess.PIPE)
++
++                self._rewrite_ld_preload(to_preload)
++
+             _bdist_wheel.run(self)
+             if is_manylinux:
+                 file = glob(path.join(self.dist_dir, '*linux*.whl'))[0]
+@@ -178,7 +228,12 @@ except ImportError as error:
+ # Additional binaries
+ if platform.system() == 'Linux':
+   libs = ['onnxruntime_pybind11_state.so', 'libdnnl.so.2', 'libmklml_intel.so', 'libmklml_gnu.so', 'libiomp5.so', 'mimalloc.so']
+-  dl_libs = ['libonnxruntime_providers_shared.so', 'libonnxruntime_providers_cuda.so']
++  dl_libs = [
++      'libonnxruntime_providers_shared.so',
++      'libonnxruntime_providers_cuda.so',
++      'libonnxruntime_providers_tensorrt.so',
++      'libonnxruntime_providers_openvino.so',
++  ]
+   # DNNL, TensorRT & OpenVINO EPs are built as shared libs
+   libs.extend(['libonnxruntime_providers_shared.so'])
+   libs.extend(['libonnxruntime_providers_dnnl.so'])
