@@ -13,7 +13,7 @@ function is_package_has_version {
     package="$1"
     version="$2"
     installed_version=$(pip show --disable-pip-version-check $package | grep "Version" | sed 's/Version: \(.*\)/\1/')
-    if ! [[ $installed_version == "$version"* ]]; then
+    if ! [[ "$installed_version" == "$version"* ]]; then
         packages_to_update[$package]=$version
     fi
 }
@@ -104,9 +104,20 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         pip install "$package~=${packages_to_install[$package]}"
     done
 
-    # @TODO: Install ONNX Runtime package from Github.
-    if [ -v install_onnxruntime ]; then
-        pip install "onnxruntime_gpu_tensorrt-${packages["onnxruntime-gpu-tensorrt"]}"
+    if ! [ -z install_onnxruntime ]; then
+        python_version="$(python -c 'import platform; print(platform.python_version())')"
+        if [[ $python_version == "3.8"* ]]; then
+            wget https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/releases/download/v1.8.1/onnxruntime_gpu_tensorrt-1.8.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+            pip install onnxruntime_gpu_tensorrt-1.8.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+            rm onnxruntime_gpu_tensorrt-1.8.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+        elif [[ $python_version == "3.7"* ]]; then
+            wget https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/releases/download/v1.8.1/onnxruntime_gpu_tensorrt-1.8.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+            pip install onnxruntime_gpu_tensorrt-1.8.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+            rm onnxruntime_gpu_tensorrt-1.8.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+        else
+            printf "\nUnsupported python version. Abort.\n"
+            exit 1
+        fi
     fi
 
     printf "Done.\n"
