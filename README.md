@@ -21,12 +21,12 @@ Wheels will be placed into `wheelhouse` folder.
 
 ## Customization
 
- - To specify `Python` versions for which wheels will be built edit `PYTHON_TARGETS` variable in `docker-run.sh`
+ - To specify `Python` versions for which wheels will be built, edit `PYTHON_TARGETS` variable in `docker-run.sh`
  - To change number of parallel threads edit `THREADS_NUM` variable in `docker-run.sh`
 
 ## Using
 
-After installation of compiled wheel you have to install the following packages from `nvidia-pyindex` repository:
+After installation of compiled wheel you need to install the following packages from `nvidia-pyindex` repository:
  - `nvidia-cudnn (8.2.0)`
  - `nvidia-tensorrt (7.2.3)`
  - `nvidia-curand (10.2.4)`
