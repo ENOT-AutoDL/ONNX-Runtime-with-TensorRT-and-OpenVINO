@@ -35,4 +35,8 @@ After installation of compiled wheel you need to install the following packages 
 and `openvino (2021.4)` from standard PyPI repository.\
 Then populate `LD_LIBRARY_PATH` variable with `lib` folders of these packages or load them dynamically.
 
-Also you can use `install.sh` script, which installs `ONNX Runtime` with necessary libraries automatically (but you need to patch `LD_LIBRARY_PATH` or load libraries manually).
+Also you can use `install.sh` script
+```
+bash <(wget -qO- https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/master/install.sh)
+```
+which installs `ONNX Runtime` with necessary libraries automatically (but you need to patch `LD_LIBRARY_PATH` or load libraries manually).
