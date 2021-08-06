@@ -13,17 +13,6 @@ while getopts ":y" opt; do
   esac
 done
 
-function is_package_has_version {
-    package="$1"
-    version="$2"
-    installed_version=$(pip show --disable-pip-version-check "$package" | grep "Version" | sed 's/Version: \(.*\)/\1/')
-    if [[ "$installed_version" == "$version"* ]]; then
-        true
-    else
-        false
-    fi
-}
-
 function is_package_installed {
     package="$1"
     if [[ $(pip list --disable-pip-version-check) =~ $package ]]; then
@@ -36,20 +25,23 @@ function is_package_installed {
 function check_package {
     package="$1"
     version="$2"
-    if is_package_installed "$package" && ! is_package_has_version "$package" "$version"; then
-        packages_to_update[$package]=$version
+    if is_package_installed "$package"; then
+        installed_version=$(pip show --disable-pip-version-check "$package" | grep "Version" | sed 's/Version: \(.*\)/\1/')
+        if ! [[ "$installed_version" =~ $version ]]; then
+            packages_to_update[$package]=$version
+        fi
     else
         packages_to_install[$package]=$version
     fi
 }
 
 declare -A packages=(\
-    ["numpy"]="1.19" \
-    ["nvidia-pyindex"]="1.0" \
-    ["nvidia-cudnn"]="8.2.0" \
-    ["nvidia-tensorrt"]="7.2.3" \
-    ["nvidia-curand"]="10.2.4" \
-    ["nvidia-cufft"]="10.4.2" \
+    ["numpy"]="1.19.*" \
+    ["nvidia-pyindex"]="1.*" \
+    ["nvidia-cudnn"]="8.2.*" \
+    ["nvidia-tensorrt"]="7.2.*" \
+    ["nvidia-curand"]="10.2.*" \
+    ["nvidia-cufft"]="10.4.*" \
     ["openvino"]="2021.4" \
     ["onnxruntime-gpu-tensorrt"]="1.8.1" \
 )
@@ -91,28 +83,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     # Install nvidia-pyindex.
     if [ -v packages_to_install["nvidia-pyindex"] ] || [ -v packages_to_update["nvidia-pyindex"] ]; then
-        pip install "nvidia-pyindex~=${packages["nvidia-pyindex"]}"
+        pip install "nvidia-pyindex==${packages["nvidia-pyindex"]}"
         unset packages_to_install["nvidia-pyindex"]
         unset packages_to_update["nvidia-pyindex"]
     fi
 
     if [ -v packages_to_install["onnxruntime-gpu-tensorrt"] ] || [ -v packages_to_update["onnxruntime-gpu-tensorrt"] ]; then
-        install_onnxruntime=1
-        unset packages_to_install["onnxruntime-gpu-tensorrt"]
-        unset packages_to_update["onnxruntime-gpu-tensorrt"]
-    fi
-
-    # Update packages.
-    for package in "${!packages_to_update[@]}"; do
-        pip install "$package~=${packages_to_update[$package]}"
-    done
-
-    # Install new packages.
-    for package in "${!packages_to_install[@]}"; do
-        pip install "$package~=${packages_to_install[$package]}"
-    done
-
-    if [[ -n $install_onnxruntime ]]; then
         python_version="$(python -c 'import platform; print(platform.python_version())')"
         if [[ $python_version == "3.7"* ]]; then
             pip install $ORT_PY37_WHL_URL
@@ -122,7 +98,20 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
             printf "\nUnsupported python version. Abort.\n"
             exit 1
         fi
+
+        unset packages_to_install["onnxruntime-gpu-tensorrt"]
+        unset packages_to_update["onnxruntime-gpu-tensorrt"]
     fi
+
+    # Update packages.
+    for package in "${!packages_to_update[@]}"; do
+        pip install "$package==${packages_to_update[$package]}"
+    done
+
+    # Install new packages.
+    for package in "${!packages_to_install[@]}"; do
+        pip install "$package==${packages_to_install[$package]}"
+    done
 
     printf "Done.\n"
 else
