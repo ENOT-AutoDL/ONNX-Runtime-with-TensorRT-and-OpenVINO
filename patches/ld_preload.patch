@@ -1,0 +1,18 @@
+diff --git a/setup.py b/setup.py
+index fb70bda..13f2c2c 100644
+--- a/setup.py
++++ b/setup.py
+@@ -122,9 +122,10 @@ try:
+                     if 'LD_PRELOAD_BEGIN_MARK' in line:
+                         break
+                 if len(to_preload) > 0:
+-                    f.write('from ctypes import CDLL, RTLD_GLOBAL\n')
+-                    for library in to_preload:
+-                        f.write('_{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split('.')[0], library))
++                    f.write('from ._libs_loader import load_shared_libraries\n')
++                    f.write('libraries = {}\n'.format(to_preload))
++                    f.write('load_shared_libraries(libraries)  # Loads and caches libraries (/etc/ld.so.cache).\n')
++                    f.write('load_shared_libraries(libraries)  # Loads libraries from cache with proper names.')
+ 
+         def run(self):
+             if is_manylinux:

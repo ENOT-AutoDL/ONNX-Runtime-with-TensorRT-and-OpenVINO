@@ -44,8 +44,11 @@ patchelf --remove-needed libinference_engine.so /opt/intel/openvino_2021/inferen
 # Clone ONNX Runtime.
 git clone --depth 1 --recursive --branch v1.8.1 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
 
-# Patch ONNX Runtime setup.py.
+# Apply patches to ONNX Runtime.
 patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/manylinux_trt_openvino.patch
+patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/ld_preload.patch
+patch $ONNX_RUNTIME_DIR/requirements.txt $PATCHES_DIR/requirements.patch
+cp $PATCHES_DIR/_libs_loader.py $ONNX_RUNTIME_DIR/onnxruntime/python/
 
 # Create directory for wheels.
 mkdir -p $WHEELHOUSE_DIR
