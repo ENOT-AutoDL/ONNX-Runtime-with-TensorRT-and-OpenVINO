@@ -1,1 +1,5 @@
 distrib/*
+build/
+devtools/
+onnxruntime/
+wheelhouse/
