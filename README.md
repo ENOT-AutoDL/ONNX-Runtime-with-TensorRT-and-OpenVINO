@@ -26,17 +26,20 @@ Wheels will be placed into `wheelhouse` folder.
 
 ## Using
 
-After installation of compiled wheel you need to install the following packages from `nvidia-pyindex` repository:
- - `nvidia-cudnn (8.2.0)`
- - `nvidia-tensorrt (7.2.3)`
- - `nvidia-curand (10.2.4)`
- - `nvidia-cufft (10.4.2)`
+Compiled wheels depend on the following packages from NVIDIA repository:
+ - `nvidia-cudnn (8.2)`
+ - `nvidia-tensorrt (7.2)`
+ - `nvidia-curand (10.2)`
+ - `nvidia-cufft (10.4)`
 
 and `openvino (2021.4)` from standard PyPI repository.\
-Then populate `LD_LIBRARY_PATH` variable with `lib` folders of these packages or load them dynamically.
+To automatically install these dependencies add `--extra-index-url https://pypi.ngc.nvidia.com` to `pip install` command:
+```
+pip install onnxruntime-gpu-tensorrt-1.8.1-*.whl --extra-index-url https://pypi.ngc.nvidia.com
+```
 
-Also you can use `install.sh` script
+Also you can use `install.sh` script:
 ```
-bash <(wget -qO- https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/master/install.sh)
+wget -O - https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/master/install.sh | bash
 ```
-which installs `ONNX Runtime` with necessary libraries automatically (but you need to patch `LD_LIBRARY_PATH` or load libraries manually).
+which installs `ONNX Runtime` with all dependencies automatically.
