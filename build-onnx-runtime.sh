@@ -48,6 +48,7 @@ git clone --depth 1 --recursive --branch v1.8.1 https://github.com/microsoft/onn
 patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/manylinux_trt_openvino.patch
 patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/ld_preload.patch
 patch $ONNX_RUNTIME_DIR/requirements.txt $PATCHES_DIR/requirements.patch
+patch $ONNX_RUNTIME_DIR/onnxruntime/python/tools/quantization/CalTableFlatBuffers/TrtTable.py $PATCHES_DIR/trt_table_import.patch
 cp $PATCHES_DIR/_libs_loader.py $ONNX_RUNTIME_DIR/onnxruntime/python/
 
 # Create directory for wheels.
