@@ -2,6 +2,8 @@
 
 Docker scripts for building [ONNX Runtime](https://github.com/microsoft/onnxruntime) with [TensorRT](https://github.com/NVIDIA/TensorRT) and [OpenVINO](https://github.com/openvinotoolkit/openvino) in manylinux environment.
 
+Supports `x86_64` and `aarch64 (JetPack)` architectures.
+
 ## Requirements
 
  - [CUDA 11.2](https://developer.nvidia.com/cuda-downloads) (and CUDA 11.1 for tests)
@@ -26,7 +28,7 @@ Wheels will be placed into `wheelhouse` folder.
 
 ## Using
 
-Compiled wheels depend on the following packages from NVIDIA repository:
+Wheels compiled for `x86_64` architecture depend on the following packages from NVIDIA repository:
  - `nvidia-cudnn (8.2)`
  - `nvidia-tensorrt (7.2)`
  - `nvidia-curand (10.2)`
