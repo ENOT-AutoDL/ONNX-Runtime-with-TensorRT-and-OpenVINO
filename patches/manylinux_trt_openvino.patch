@@ -1,17 +1,48 @@
 diff --git a/setup.py b/setup.py
-index fb70bda..dc61619 100644
+index 888d935..32732bc 100644
 --- a/setup.py
 +++ b/setup.py
-@@ -159,7 +159,57 @@ try:
+@@ -120,17 +120,18 @@ try:
+         def _rewrite_ld_preload(self, to_preload):
+             with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
+                 if len(to_preload) > 0:
+-                    f.write('from ctypes import CDLL, RTLD_GLOBAL\n')
+-                    for library in to_preload:
+-                        f.write('_{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split('.')[0], library))
++                    f.write('from ._libs_loader import load_shared_libraries\n')
++                    f.write('libraries = {}\n'.format(to_preload))
++                    f.write('load_shared_libraries(libraries)  # Loads and caches libraries (/etc/ld.so.cache).\n')
++                    f.write('load_shared_libraries(libraries)  # Loads libraries from cache with proper names.\n')
+ 
+         def _rewrite_ld_preload_cuda(self, to_preload):
+             with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
+                 if len(to_preload) > 0:
+-                    f.write('from ctypes import CDLL, RTLD_GLOBAL\n')
+                     f.write('try:\n')
+-                    for library in to_preload:
+-                        f.write('    _{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split('.')[0], library))
++                    f.write('    libraries = {}\n'.format(to_preload))
++                    f.write('    load_shared_libraries(libraries)  # Loads and caches libraries (/etc/ld.so.cache).\n')
++                    f.write('    load_shared_libraries(libraries)  # Loads libraries from cache with proper names.\n')
+                     f.write('except OSError:\n')
+                     f.write('    import os\n')
+                     f.write('    os.environ["ORT_CUDA_UNAVAILABLE"] = "1"\n')
+@@ -167,15 +168,64 @@ try:
+                     for line in result.stdout.split('\n'):
+                         for dependency in cuda_dependencies:
+                             if dependency in line:
+-                                if dependency not in to_preload:
++                                if dependency not in to_preload + to_preload_cuda:
+                                     to_preload_cuda.append(line)
+                                 args.extend(['--remove-needed', line])
                      args.append(dest)
                      if len(args) > 3:
                          subprocess.run(args, check=True, stdout=subprocess.PIPE)
--                    self._rewrite_ld_preload(to_preload)
-+
+ 
 +                dest = 'onnxruntime/capi/libonnxruntime_providers_tensorrt.so'
 +                if path.isfile(dest):
 +                    result = subprocess.run(['patchelf', '--print-needed', dest], check=True, stdout=subprocess.PIPE, universal_newlines=True)
-+                    dependencies = [
++                    trt_dependencies = [
 +                        'libcublas.so',
 +                        'libcublasLt.so',
 +                        'libcudnn.so',
@@ -23,10 +54,10 @@ index fb70bda..dc61619 100644
 +                    ]
 +                    args = ['patchelf', '--debug']
 +                    for line in result.stdout.split('\n'):
-+                        for dependency in dependencies:
++                        for dependency in trt_dependencies:
 +                            if dependency in line:
-+                                if not dependency in to_preload:
-+                                    to_preload.append(line)
++                                if not dependency in to_preload + to_preload_cuda:
++                                    to_preload_cuda.append(line)
 +                                args.extend(['--remove-needed', line])
 +                    args.append(dest)
 +                    if len(args) > 3:
@@ -35,7 +66,7 @@ index fb70bda..dc61619 100644
 +                dest = 'onnxruntime/capi/libonnxruntime_providers_openvino.so'
 +                if path.isfile(dest):
 +                    result = subprocess.run(['patchelf', '--print-needed', dest], check=True, stdout=subprocess.PIPE, universal_newlines=True)
-+                    dependencies = [
++                    openvino_dependencies = [
 +                        'libtbbmalloc.so',
 +                        'libinference_engine.so',
 +                        'libonnx_importer.so',
@@ -47,31 +78,32 @@ index fb70bda..dc61619 100644
 +                    ]
 +                    args = ['patchelf', '--debug']
 +                    for line in result.stdout.split('\n'):
-+                        for dependency in dependencies:
++                        for dependency in openvino_dependencies:
 +                            if dependency in line:
-+                                if not dependency in to_preload:
++                                if not dependency in to_preload + to_preload_cuda:
 +                                    to_preload.append(line)
 +                                args.extend(['--remove-needed', line])
 +                    args.append(dest)
 +                    if len(args) > 3:
 +                        subprocess.run(args, check=True, stdout=subprocess.PIPE)
 +
-+                self._rewrite_ld_preload(to_preload)
+                 self._rewrite_ld_preload(to_preload)
+                 self._rewrite_ld_preload_cuda(to_preload_cuda)
 +
              _bdist_wheel.run(self)
              if is_manylinux:
                  file = glob(path.join(self.dist_dir, '*linux*.whl'))[0]
-@@ -178,7 +228,12 @@ except ImportError as error:
- # Additional binaries
+@@ -196,7 +246,12 @@ except ImportError as error:
  if platform.system() == 'Linux':
-   libs = ['onnxruntime_pybind11_state.so', 'libdnnl.so.2', 'libmklml_intel.so', 'libmklml_gnu.so', 'libiomp5.so', 'mimalloc.so']
--  dl_libs = ['libonnxruntime_providers_shared.so', 'libonnxruntime_providers_cuda.so']
-+  dl_libs = [
+     libs = ['onnxruntime_pybind11_state.so', 'libdnnl.so.2', 'libmklml_intel.so', 'libmklml_gnu.so', 'libiomp5.so',
+             'mimalloc.so']
+-    dl_libs = ['libonnxruntime_providers_shared.so', 'libonnxruntime_providers_cuda.so']
++    dl_libs = [
 +      'libonnxruntime_providers_shared.so',
 +      'libonnxruntime_providers_cuda.so',
 +      'libonnxruntime_providers_tensorrt.so',
 +      'libonnxruntime_providers_openvino.so',
-+  ]
-   # DNNL, TensorRT & OpenVINO EPs are built as shared libs
-   libs.extend(['libonnxruntime_providers_shared.so'])
-   libs.extend(['libonnxruntime_providers_dnnl.so'])
++    ]
+     # DNNL, TensorRT & OpenVINO EPs are built as shared libs
+     libs.extend(['libonnxruntime_providers_shared.so'])
+     libs.extend(['libonnxruntime_providers_dnnl.so'])

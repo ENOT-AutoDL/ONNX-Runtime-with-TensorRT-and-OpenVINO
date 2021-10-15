@@ -11,7 +11,7 @@ ONNX_RUNTIME_DIR=/io/onnxruntime
 PATCHES_DIR=/io/patches
 
 # Unpack CUDA toolkit and add executables to PATH.
-bash $DISTRIB_DIR/cuda_11.2.2_460.32.03_linux.run --silent --toolkit --toolkitpath=$CUDA_DIR
+bash $DISTRIB_DIR/cuda_11.4.2_470.57.02_linux.run --silent --toolkit --toolkitpath=$CUDA_DIR
 export PATH=$CUDA_DIR/bin:$PATH
 
 # Install CUDA 11.1 toolkit (for tests only).
@@ -19,16 +19,16 @@ export PATH=$CUDA_DIR/bin:$PATH
 # If you are developing an application that is being compiled with CUDA 11.2 or you are using CUDA 11.2 libraries
 # to run your application, then you must install CUDA 11.1.
 # NVRTC from CUDA 11.1 is a runtime requirement of TensorRT and must be present to run TensorRT applications.
-bash $DISTRIB_DIR/cuda_11.1.1_455.32.00_linux.run --silent --toolkit --toolkitpath=$CUDA_11_1_DIR
+#bash $DISTRIB_DIR/cuda_11.1.1_455.32.00_linux.run --silent --toolkit --toolkitpath=$CUDA_11_1_DIR
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_DIR/lib64:$CUDA_11_1_DIR/lib64
 
 # Unpack cuDNN headers and libs.
-tar -zxvf /io/distrib/cudnn-11.3-linux-x64-v8.2.1.32.tgz -C $CUDA_DIR/include cuda/include --strip-component=2
-tar -zxvf /io/distrib/cudnn-11.3-linux-x64-v8.2.1.32.tgz -C $CUDA_DIR/lib64 cuda/lib64 --strip-component=2
+tar -zxvf /io/distrib/cudnn-11.4-linux-x64-v8.2.4.15.tgz -C $CUDA_DIR/include cuda/include --strip-component=2
+tar -zxvf /io/distrib/cudnn-11.4-linux-x64-v8.2.4.15.tgz -C $CUDA_DIR/lib64 cuda/lib64 --strip-component=2
 
 # Unpack TensorRT.
 mkdir -p $TENSOR_RT_DIR
-tar -zxvf $DISTRIB_DIR/TensorRT-7.2.3.4.CentOS-7.9.x86_64-gnu.cuda-11.1.cudnn8.1.tar.gz -C $TENSOR_RT_DIR --strip-component=1
+tar -zxvf $DISTRIB_DIR/TensorRT-8.0.3.4.Linux.x86_64-gnu.cuda-11.3.cudnn8.2.tar.gz -C $TENSOR_RT_DIR --strip-component=1
 
 # Install OpenVINO.
 yum install yum-utils
@@ -42,13 +42,11 @@ yum -y install intel-openvino-runtime-centos7
 patchelf --remove-needed libinference_engine.so /opt/intel/openvino_2021/inference_engine/lib/intel64/libinference_engine_c_api.so
 
 # Clone ONNX Runtime.
-git clone --depth 1 --recursive --branch v1.8.1 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
+git clone --depth 1 --recursive --branch v1.9.0 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
 
 # Apply patches to ONNX Runtime.
 patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/manylinux_trt_openvino.patch
-patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/ld_preload.patch
-patch $ONNX_RUNTIME_DIR/requirements.txt $PATCHES_DIR/requirements.patch
-patch $ONNX_RUNTIME_DIR/onnxruntime/python/tools/quantization/CalTableFlatBuffers/TrtTable.py $PATCHES_DIR/trt_table_import.patch
+patch $ONNX_RUNTIME_DIR/requirements.txt.in $PATCHES_DIR/requirements.patch
 cp $PATCHES_DIR/_libs_loader.py $ONNX_RUNTIME_DIR/onnxruntime/python/
 
 # Create directory for wheels.
@@ -78,7 +76,7 @@ for PYBIN in ${PYBINS[@]}; do
     bash $ONNX_RUNTIME_DIR/build.sh \
         --cudnn_home $CUDA_DIR/lib64 \
         --cuda_home $CUDA_DIR \
-        --cuda_version 11.2 \
+        --cuda_version 11.4 \
         --use_tensorrt \
         --tensorrt_home $TENSOR_RT_DIR \
         --use_openvino \
