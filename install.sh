@@ -34,11 +34,12 @@ if [[ $arch == "x86_64" ]]; then
 
     python -m pip install -U pip
     pip install wheel
+    pip install onnxruntime # Hack, will be removed in the future.
 
     if [[ $python_version == "3.7"* ]]; then
-        pip install $ORT_PY37_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
+        pip install -U --force $ORT_PY37_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
     elif [[ $python_version == "3.8"* ]]; then
-        pip install $ORT_PY38_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
+        pip install -U --force $ORT_PY38_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
     fi
 
 elif [[ $arch == "aarch64" ]]; then
