@@ -4,8 +4,9 @@ set -e -u
 function ver { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
 
 BASE_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/releases/download"
-ORT_PY37_WHL_URL="${BASE_URL}/v1.9.0/onnxruntime_gpu_tensorrt-1.9.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY38_WHL_URL="${BASE_URL}/v1.9.0/onnxruntime_gpu_tensorrt-1.9.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY37_WHL_URL="${BASE_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY38_WHL_URL="${BASE_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY39_WHL_URL="${BASE_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY36_AARCH64_JP46_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP46_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP46_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
@@ -27,7 +28,7 @@ if [[ $arch == "x86_64" ]]; then
         exit 1
     fi
 
-    if ! [[ "$python_version" =~ 3\.[7-8]\.* ]]; then
+    if ! [[ "$python_version" =~ 3\.[7-9]\.* ]]; then
         printf "Unsupported python version. Abort.\n"
         exit 1
     fi
@@ -40,6 +41,8 @@ if [[ $arch == "x86_64" ]]; then
         pip install -U --force $ORT_PY37_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
     elif [[ $python_version == "3.8"* ]]; then
         pip install -U --force $ORT_PY38_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
+    elif [[ $python_version == "3.9"* ]]; then
+        pip install -U --force $ORT_PY39_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
     fi
 
 elif [[ $arch == "aarch64" ]]; then
