@@ -42,7 +42,7 @@ yum -y install intel-openvino-runtime-centos7
 patchelf --remove-needed libinference_engine.so /opt/intel/openvino_2021/inference_engine/lib/intel64/libinference_engine_c_api.so
 
 # Clone ONNX Runtime.
-git clone --depth 1 --recursive --branch v1.9.0 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
+git clone --depth 1 --recursive --branch v1.9.1 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
 
 # Apply patches to ONNX Runtime.
 patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/manylinux_trt_openvino.patch
