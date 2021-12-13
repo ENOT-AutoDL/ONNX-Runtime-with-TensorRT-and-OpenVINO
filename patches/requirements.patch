@@ -10,4 +10,4 @@ index 1040bd7..40650b2 100644
 +nvidia-tensorrt == 8.0.*
 +nvidia-curand == 10.2.*
 +nvidia-cufft == 10.4.*
-+openvino == 2021.4
++openvino-dev == 2021.4.2
