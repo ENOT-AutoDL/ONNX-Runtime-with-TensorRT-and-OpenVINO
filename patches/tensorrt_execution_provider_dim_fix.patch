@@ -1,0 +1,16 @@
+diff --git onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
+index acf7e09..3d2ea73 100644
+--- onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
++++ onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
+@@ -1749,7 +1749,10 @@ common::Status TensorrtExecutionProvider::Compile(const std::vector<Node*>& fuse
+             for (int j = 0, end = nb_dims; j < end; ++j) {
+               dimensions.d[j] = tensor_shapes[j];
+             }
+-            trt_context->setBindingDimensions(binding_index, dimensions);
++            const bool status = trt_context->setBindingDimensions(binding_index, dimensions);
++            if (not status) {
++                throw std::runtime_error("Invalid dimensions");
++            }
+           }
+         }
+ 
