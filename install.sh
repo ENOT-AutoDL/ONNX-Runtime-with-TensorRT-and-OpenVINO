@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -e -u
 
+CHECK_DRIVER_VERSION=1
+
+while getopts ":d" opt; do
+  case $opt in
+    d) CHECK_DRIVER_VERSION=0;;
+    *) echo "got unknown option" && exit 1;;
+  esac
+done
+
 function ver { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
 
 BASE_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/releases/download"
@@ -19,13 +28,15 @@ python_version="$(python -c 'import platform; print(platform.python_version())')
 
 if [[ $arch == "x86_64" ]]; then
 
-    driver_version="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader)"
-    minimal_driver_version='460.27.04'
+    if [[ $CHECK_DRIVER_VERSION == 1 ]]; then
+        driver_version="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader)"
+        minimal_driver_version='460.27.04'
 
-    if [[ $(ver "$driver_version") < $(ver "$minimal_driver_version") ]]; then
-        printf "NVIDIA driver version should be %s or higher.\n" "$minimal_driver_version"
-        printf "Current NVIDIA driver version %s. Abort.\n" "$driver_version"
-        exit 1
+        if [[ $(ver "$driver_version") < $(ver "$minimal_driver_version") ]]; then
+            printf "NVIDIA driver version should be %s or higher.\n" "$minimal_driver_version"
+            printf "Current NVIDIA driver version %s. Abort.\n" "$driver_version"
+            exit 1
+        fi
     fi
 
     if ! [[ "$python_version" =~ 3\.[7-9]\.* ]]; then
