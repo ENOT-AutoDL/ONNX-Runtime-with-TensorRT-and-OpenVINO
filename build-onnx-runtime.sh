@@ -48,6 +48,7 @@ git clone --depth 1 --recursive --branch v1.9.1 https://github.com/microsoft/onn
 patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/manylinux_trt_openvino.patch
 patch $ONNX_RUNTIME_DIR/requirements.txt.in $PATCHES_DIR/requirements.patch
 patch $ONNX_RUNTIME_DIR/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc $PATCHES_DIR/tensorrt_execution_provider_dim_fix.patch
+patch $ONNX_RUNTIME_DIR/onnxruntime/core/optimizer/constant_folding.cc $PATCHES_DIR/disable_qdq_constant_folding.patch
 patch -d $ONNX_RUNTIME_DIR -p0 < $PATCHES_DIR/openvino_execution_provider_native_support.patch
 cp $PATCHES_DIR/_libs_loader.py $ONNX_RUNTIME_DIR/onnxruntime/python/
 

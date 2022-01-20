@@ -1,0 +1,14 @@
+diff --git onnxruntime/core/optimizer/constant_folding.cc onnxruntime/core/optimizer/constant_folding.cc
+index ce011b4..a408f1e 100644
+--- onnxruntime/core/optimizer/constant_folding.cc
++++ onnxruntime/core/optimizer/constant_folding.cc
+@@ -110,6 +110,9 @@ Status ConstantFolding::ApplyImpl(Graph& graph, bool& modified, int graph_level,
+     if (skip_dequantize_linear_ && node->OpType().compare("DequantizeLinear") == 0) {
+       continue;
+     }
++    if (skip_dequantize_linear_ && node->OpType().compare("QuantizeLinear") == 0) {
++      continue;
++    }
+ 
+     ORT_RETURN_IF_ERROR(Recurse(*node, modified, graph_level, logger));
+ 

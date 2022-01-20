@@ -21,19 +21,20 @@ index 8986cdc..5a40dc6 100644
  
  struct OrtApi;
 diff --git onnxruntime/core/providers/openvino/backend_utils.cc onnxruntime/core/providers/openvino/backend_utils.cc
-index f683f00..1cc2d3b 100644
+index f683f00..9d6af55 100644
 --- onnxruntime/core/providers/openvino/backend_utils.cc
 +++ onnxruntime/core/providers/openvino/backend_utils.cc
-@@ -6,6 +6,8 @@
+@@ -6,6 +6,9 @@
  #include <memory>
  #include <sstream>
  #include <fstream>
 +#include <cstdlib>
 +#include <sys/wait.h>
++#include <filesystem>
  
  #include <inference_engine.hpp>
  
-@@ -134,15 +136,51 @@ CreateCNNNetwork(const ONNX_NAMESPACE::ModelProto& model_proto, const GlobalCont
+@@ -134,15 +137,53 @@ CreateCNNNetwork(const ONNX_NAMESPACE::ModelProto& model_proto, const GlobalCont
  #else
    //ReadNetwork() API flow will be used in OpenVINO-EP starting from OpenVINO 2021.4
    InferenceEngine::CNNNetwork cnn_network;
@@ -51,24 +52,26 @@ index f683f00..1cc2d3b 100644
 +  if (global_context.enable_optimization) {
 +    try {
 +      const std::string workdir = global_context.optimization_workdir;
-+      std::ofstream onnx_file(workdir + "/model.onnx", std::ofstream::binary);
++      const std::string dump_name = "model";
++      std::filesystem::create_directory(workdir + "/");
++      std::ofstream onnx_file(workdir + "/" + dump_name + ".onnx", std::ofstream::binary);
 +      model_proto.SerializeToOstream(onnx_file);
++      onnx_file.close();
 +
-+      const std::string input_model = "'" + workdir + "/model.onnx'";
++      const std::string input_model = "'" + workdir + "/" + dump_name + ".onnx'";
 +      const std::string output_dir = "'" + workdir + "'";
 +      const std::string cmd = "mo" \
 +                        " --input_model " + input_model \
 +                      + " --output_dir " + output_dir \
-+                      + " --model_name 'model'" \
++                      + " --model_name '" + dump_name + "'" \
 +                        " --framework 'onnx' > /dev/null 2>&1";
 +      int rcode = std::system(cmd.c_str());
 +      rcode = (rcode != -1 && rcode != 127 && WIFEXITED(rcode)) ? WEXITSTATUS(rcode) : -1;
 +      if (rcode != 0) {
 +          throw std::runtime_error("No model optimizer found");
 +      }
-+      onnx_file.close();
 +
-+      cnn_network = global_context.ie_core.ReadNetwork(workdir + "/model.xml", workdir + "/model.bin");
++      cnn_network = global_context.ie_core.ReadNetwork(workdir + "/" + dump_name+ ".xml", workdir + "/" + dump_name + ".bin");
 +      is_network_optimized = true;
 +      LOGS_DEFAULT(INFO) << "Optimize and Read network Done";
 +    } catch (const Exception& e) {
@@ -94,6 +97,31 @@ index f683f00..1cc2d3b 100644
    }
    ng_function = cnn_network.getFunction();
  #endif
+@@ -154,24 +195,6 @@ CreateCNNNetwork(const ONNX_NAMESPACE::ModelProto& model_proto, const GlobalCont
+     ng_function->validate_nodes_and_infer_types();
+   }
+ 
+-  if (!global_context.is_wholly_supported_graph) {
+-    std::map<std::string, std::string> result_to_output;
+-    for (auto& result : ng_function->get_results()) {
+-      result_to_output[result->get_friendly_name()] = result->input_value(0).get_node_shared_ptr()->get_friendly_name();
+-    }
+-
+-    ngraph::pass::ConstantFolding().run_on_function(ng_function);
+-    auto& results = const_cast<::ngraph::ResultVector&>(ng_function->get_results());
+-    size_t index = results.size() - 1;
+-    for (auto it = results.rbegin(); it != results.rend(); ++it) {
+-      if (auto const_node = std::dynamic_pointer_cast<ngraph::op::Constant>((*it)->input_value(0).get_node_shared_ptr())) {
+-        const_outputs_map[result_to_output.at((*it)->get_friendly_name())] = const_node;
+-        results.erase(results.begin() + index);
+-      }
+-      --index;
+-    }
+-  }
+-
+   try {
+     return std::make_shared<InferenceEngine::CNNNetwork>(ng_function);
+   } catch (const Exception& e) {
 diff --git onnxruntime/core/providers/openvino/contexts.h onnxruntime/core/providers/openvino/contexts.h
 index 6453c41..ac85083 100644
 --- onnxruntime/core/providers/openvino/contexts.h
