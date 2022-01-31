@@ -12,19 +12,29 @@ done
 
 function ver { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
 
-BASE_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/releases/download"
-ORT_PY37_WHL_URL="${BASE_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY38_WHL_URL="${BASE_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY39_WHL_URL="${BASE_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY36_AARCH64_JP46_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY37_AARCH64_JP46_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY38_AARCH64_JP46_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY36_AARCH64_JP45_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY37_AARCH64_JP45_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY38_AARCH64_JP45_WHL_URL="${BASE_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+REPO_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO"
+RELEASES_URL="${REPO_URL}/releases/download"
+REPO_RAW_URL="https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO"
+MASTER_URL="${REPO_RAW_URL}/master"
+ORT_PY37_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY38_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY39_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY36_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY37_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY38_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+MO_QDQ_PATCH_URL="${MASTER_URL}/patches/mo_quantize_dequantize_linear.patch"
+MO_LOADER_PATCH_URL="${MASTER_URL}/patches/mo_loader.patch"
 
 arch="$(uname -m)"
 python_version="$(python -c 'import platform; print(platform.python_version())')"
+
+if ! [[ -x "$(command -v patch)" ]]; then
+    printf "patch command is not installed, install it before running this script (ubuntu: apt install patch). Abort.\n"
+    exit 1
+fi
 
 if [[ $arch == "x86_64" ]]; then
 
@@ -55,6 +65,10 @@ if [[ $arch == "x86_64" ]]; then
     elif [[ $python_version == "3.9"* ]]; then
         pip install -U --force $ORT_PY39_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
     fi
+
+    mo_path=$(python -c 'import mo; import pathlib; print(pathlib.Path(mo.__path__[0]).parent.absolute())')
+    wget -O - "$MO_QDQ_PATCH_URL" | patch "${mo_path}/extensions/front/onnx/quantize_dequantize_linear.py"
+    wget -O - "$MO_LOADER_PATCH_URL" | patch "${mo_path}/extensions/load/onnx/loader.py"
 
 elif [[ $arch == "aarch64" ]]; then
 
