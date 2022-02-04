@@ -2,13 +2,34 @@
 set -e -u
 
 CHECK_DRIVER_VERSION=1
+DEVICE_TYPE="GPU"
 
-while getopts ":d" opt; do
-  case $opt in
+function display_help {
+    echo "Usage: $0 [option...]" >&2
+    echo
+    echo "   -t <DEVICE>        Select device type: GPU or CPU, default value is GPU"
+    echo "                      Use CPU if target device only has CPU (GPU includes CPU)"
+    echo "   -d                 Disable driver version checking (useful for docker container building)"
+}
+
+while getopts "h?dt:" opt; do
+  case "$opt" in
     d) CHECK_DRIVER_VERSION=0;;
-    *) echo "got unknown option" && exit 1;;
+    t)
+        DEVICE_TYPE=$OPTARG;
+        if ! [[ "$DEVICE_TYPE" =~ ^CPU$|^GPU$ ]]; then
+            display_help
+            exit 1
+        fi
+        ;;
+    h|\?)
+        display_help
+        exit 0
+        ;;
   esac
 done
+shift $((OPTIND-1))
+[ "${1:-}" = "--" ] && shift
 
 function ver { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
 
@@ -16,9 +37,12 @@ REPO_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO
 RELEASES_URL="${REPO_URL}/releases/download"
 REPO_RAW_URL="https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO"
 MASTER_URL="${REPO_RAW_URL}/master"
-ORT_PY37_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY38_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY39_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_GPU_PY37_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_GPU_PY38_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_GPU_PY39_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_gpu_tensorrt-1.9.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_CPU_PY37_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_openvino-1.9.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_CPU_PY38_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_openvino-1.9.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_CPU_PY39_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_openvino-1.9.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
@@ -27,6 +51,16 @@ ORT_PY37_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu
 ORT_PY38_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 MO_QDQ_PATCH_URL="${MASTER_URL}/patches/mo_quantize_dequantize_linear.patch"
 MO_LOADER_PATCH_URL="${MASTER_URL}/patches/mo_loader.patch"
+
+if [[ "$DEVICE_TYPE" == "GPU" ]]; then
+    ORT_PY37_WHL_URL=$ORT_GPU_PY37_WHL_URL
+    ORT_PY38_WHL_URL=$ORT_GPU_PY38_WHL_URL
+    ORT_PY39_WHL_URL=$ORT_GPU_PY39_WHL_URL
+else
+    ORT_PY37_WHL_URL=$ORT_CPU_PY37_WHL_URL
+    ORT_PY38_WHL_URL=$ORT_CPU_PY38_WHL_URL
+    ORT_PY39_WHL_URL=$ORT_CPU_PY39_WHL_URL
+fi
 
 arch="$(uname -m)"
 python_version="$(python -c 'import platform; print(platform.python_version())')"
@@ -38,7 +72,7 @@ fi
 
 if [[ $arch == "x86_64" ]]; then
 
-    if [[ $CHECK_DRIVER_VERSION == 1 ]]; then
+    if [[ $CHECK_DRIVER_VERSION == 1 && $DEVICE_TYPE == "GPU" ]]; then
         driver_version="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader)"
         minimal_driver_version='460.27.04'
 
