@@ -28,6 +28,8 @@ Wheels will be placed into `wheelhouse` folder.
 
 ## Using
 
+There are two types of builds: `GPU` and `CPU`, if your target device has only `CPU`, then you should use `CPU` version.
+
 Wheels compiled for `x86_64` architecture depend on the following packages from NVIDIA repository:
  - `nvidia-cudnn (8.2)`
  - `nvidia-tensorrt (8.0)`
@@ -37,11 +39,17 @@ Wheels compiled for `x86_64` architecture depend on the following packages from 
 and `openvino (2021.4)` from standard PyPI repository.\
 To automatically install these dependencies add `--extra-index-url https://pypi.ngc.nvidia.com` to `pip install` command:
 ```
-pip install onnxruntime-gpu-tensorrt-1.8.1-*.whl --extra-index-url https://pypi.ngc.nvidia.com
+pip install onnxruntime-*.whl --extra-index-url https://pypi.ngc.nvidia.com
 ```
 
-Also you can use `install.sh` script:
+Also you can use `install.sh` script to install `GPU` version:
 ```
 wget -O - https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/master/install.sh | bash
 ```
+or:
+```
+wget -O - https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO/master/install.sh | bash -s -- -t CPU
+```
+to install `CPU`-only version.
+
 which installs `ONNX Runtime` with all dependencies automatically.
