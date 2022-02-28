@@ -1,29 +1,29 @@
-diff --git include/onnxruntime/core/session/onnxruntime_c_api.h include/onnxruntime/core/session/onnxruntime_c_api.h
-index 8986cdc..5a40dc6 100644
---- include/onnxruntime/core/session/onnxruntime_c_api.h
-+++ include/onnxruntime/core/session/onnxruntime_c_api.h
-@@ -384,7 +384,7 @@ typedef struct OrtTensorRTProviderOptions {
- /// </summary>
+diff --git a/include/onnxruntime/core/session/onnxruntime_c_api.h b/include/onnxruntime/core/session/onnxruntime_c_api.h
+index 12d3c54..600bac9 100644
+--- a/include/onnxruntime/core/session/onnxruntime_c_api.h
++++ b/include/onnxruntime/core/session/onnxruntime_c_api.h
+@@ -488,7 +488,7 @@ typedef struct OrtTensorRTProviderOptions {
+ */
  typedef struct OrtOpenVINOProviderOptions {
  #ifdef __cplusplus
--  OrtOpenVINOProviderOptions() : device_type{}, enable_vpu_fast_compile{}, device_id{}, num_of_threads{}, use_compiled_network{}, blob_dump_path{} {}
-+  OrtOpenVINOProviderOptions() : device_type{}, enable_vpu_fast_compile{}, device_id{}, num_of_threads{}, use_compiled_network{}, blob_dump_path{}, enable_optimization{}, optimization_workdir{} {}
+-  OrtOpenVINOProviderOptions() : device_type{}, enable_vpu_fast_compile{}, device_id{}, num_of_threads{}, use_compiled_network{}, blob_dump_path{}, context{} {}
++  OrtOpenVINOProviderOptions() : device_type{}, enable_vpu_fast_compile{}, device_id{}, num_of_threads{}, use_compiled_network{}, blob_dump_path{}, context{}, enable_optimization{}, optimization_workdir{} {}
  #endif
-   const char* device_type;                // CPU_FP32, GPU_FP32, GPU_FP16, MYRIAD_FP16, VAD-M_FP16 or VAD-F_FP32
-   unsigned char enable_vpu_fast_compile;  // 0 = false, nonzero = true
-@@ -392,6 +392,8 @@ typedef struct OrtOpenVINOProviderOptions {
-   size_t num_of_threads;               // 0 uses default number of threads
-   unsigned char use_compiled_network;  // 0 = false, nonzero = true
+   /** \brief Device type string
+   *
+@@ -501,6 +501,8 @@ typedef struct OrtOpenVINOProviderOptions {
+   unsigned char use_compiled_network;  ///< 0 = disabled, nonzero = enabled
    const char* blob_dump_path;          // path is set to empty by default
+   void* context;
 +  unsigned char enable_optimization;
 +  const char* optimization_workdir;
  } OrtOpenVINOProviderOptions;
  
  struct OrtApi;
-diff --git onnxruntime/core/providers/openvino/backend_utils.cc onnxruntime/core/providers/openvino/backend_utils.cc
-index f683f00..9d6af55 100644
---- onnxruntime/core/providers/openvino/backend_utils.cc
-+++ onnxruntime/core/providers/openvino/backend_utils.cc
+diff --git a/onnxruntime/core/providers/openvino/backend_utils.cc b/onnxruntime/core/providers/openvino/backend_utils.cc
+index 924943c..b6bb77c 100644
+--- a/onnxruntime/core/providers/openvino/backend_utils.cc
++++ b/onnxruntime/core/providers/openvino/backend_utils.cc
 @@ -6,6 +6,9 @@
  #include <memory>
  #include <sstream>
@@ -71,7 +71,7 @@ index f683f00..9d6af55 100644
 +          throw std::runtime_error("No model optimizer found");
 +      }
 +
-+      cnn_network = global_context.ie_core.ReadNetwork(workdir + "/" + dump_name+ ".xml", workdir + "/" + dump_name + ".bin");
++      cnn_network = global_context.ie_core.ReadNetwork(workdir + "/" + dump_name + ".xml", workdir + "/" + dump_name + ".bin");
 +      is_network_optimized = true;
 +      LOGS_DEFAULT(INFO) << "Optimize and Read network Done";
 +    } catch (const Exception& e) {
@@ -122,10 +122,10 @@ index f683f00..9d6af55 100644
    try {
      return std::make_shared<InferenceEngine::CNNNetwork>(ng_function);
    } catch (const Exception& e) {
-diff --git onnxruntime/core/providers/openvino/contexts.h onnxruntime/core/providers/openvino/contexts.h
-index 6453c41..ac85083 100644
---- onnxruntime/core/providers/openvino/contexts.h
-+++ onnxruntime/core/providers/openvino/contexts.h
+diff --git a/onnxruntime/core/providers/openvino/contexts.h b/onnxruntime/core/providers/openvino/contexts.h
+index 2254cc8..8a1b474 100644
+--- a/onnxruntime/core/providers/openvino/contexts.h
++++ b/onnxruntime/core/providers/openvino/contexts.h
 @@ -14,11 +14,13 @@ struct GlobalContext {
    bool is_wholly_supported_graph = false;
    bool enable_vpu_fast_compile = false;
@@ -140,60 +140,60 @@ index 6453c41..ac85083 100644
    std::vector<bool> deviceAvailableList = {true, true, true, true, true, true, true, true};
    std::vector<std::string> deviceTags = {"0", "1", "2", "3", "4", "5", "6", "7"};
    std::string onnx_model_name;
-diff --git onnxruntime/core/providers/openvino/openvino_execution_provider.cc onnxruntime/core/providers/openvino/openvino_execution_provider.cc
-index c8e261a..731e35c 100644
---- onnxruntime/core/providers/openvino/openvino_execution_provider.cc
-+++ onnxruntime/core/providers/openvino/openvino_execution_provider.cc
-@@ -19,7 +19,9 @@ OpenVINOExecutionProvider::OpenVINOExecutionProvider(const OpenVINOExecutionProv
+diff --git a/onnxruntime/core/providers/openvino/openvino_execution_provider.cc b/onnxruntime/core/providers/openvino/openvino_execution_provider.cc
+index 53f16f2..3f52c45 100644
+--- a/onnxruntime/core/providers/openvino/openvino_execution_provider.cc
++++ b/onnxruntime/core/providers/openvino/openvino_execution_provider.cc
+@@ -17,7 +17,9 @@ OpenVINOExecutionProvider::OpenVINOExecutionProvider(const OpenVINOExecutionProv
    openvino_ep::BackendManager::GetGlobalContext().precision_str = info.precision_;
    openvino_ep::BackendManager::GetGlobalContext().enable_vpu_fast_compile = info.enable_vpu_fast_compile_;
    openvino_ep::BackendManager::GetGlobalContext().use_compiled_network = info.use_compiled_network_;
 +  openvino_ep::BackendManager::GetGlobalContext().enable_optimization = info.enable_optimization_;
    openvino_ep::BackendManager::GetGlobalContext().blob_dump_path = info.blob_dump_path_;
 +  openvino_ep::BackendManager::GetGlobalContext().optimization_workdir = info.optimization_workdir_;
+   openvino_ep::BackendManager::GetGlobalContext().context = info.context_;
  
    if ((int)info.num_of_threads_ <= 0) {
-     openvino_ep::BackendManager::GetGlobalContext().num_of_threads = 8;
-diff --git onnxruntime/core/providers/openvino/openvino_execution_provider.h onnxruntime/core/providers/openvino/openvino_execution_provider.h
-index 469ce4e..368f3d8 100644
---- onnxruntime/core/providers/openvino/openvino_execution_provider.h
-+++ onnxruntime/core/providers/openvino/openvino_execution_provider.h
-@@ -58,9 +58,11 @@ struct OpenVINOExecutionProviderInfo {
-   size_t num_of_threads_;
+diff --git a/onnxruntime/core/providers/openvino/openvino_execution_provider.h b/onnxruntime/core/providers/openvino/openvino_execution_provider.h
+index a4a4ad9..8b01696 100644
+--- a/onnxruntime/core/providers/openvino/openvino_execution_provider.h
++++ b/onnxruntime/core/providers/openvino/openvino_execution_provider.h
+@@ -59,9 +59,11 @@ struct OpenVINOExecutionProviderInfo {
    bool use_compiled_network_;
    std::string blob_dump_path_;
+   void* context_;
 +  bool enable_optimization_;
 +  std::string optimization_workdir_;
  
--  explicit OpenVINOExecutionProviderInfo(std::string dev_type, bool enable_vpu_fast_compile, std::string dev_id, size_t num_of_threads, bool use_compiled_network, std::string blob_dump_path)
--      : enable_vpu_fast_compile_(enable_vpu_fast_compile), device_id_(dev_id), num_of_threads_(num_of_threads), use_compiled_network_(use_compiled_network), blob_dump_path_(blob_dump_path) {
-+  explicit OpenVINOExecutionProviderInfo(std::string dev_type, bool enable_vpu_fast_compile, std::string dev_id, size_t num_of_threads, bool use_compiled_network, std::string blob_dump_path, bool enable_optimization, std::string optimization_workdir)
-+      : enable_vpu_fast_compile_(enable_vpu_fast_compile), device_id_(dev_id), num_of_threads_(num_of_threads), use_compiled_network_(use_compiled_network), blob_dump_path_(blob_dump_path), enable_optimization_(enable_optimization), optimization_workdir_(optimization_workdir) {
+-  explicit OpenVINOExecutionProviderInfo(std::string dev_type, bool enable_vpu_fast_compile, std::string dev_id, size_t num_of_threads, bool use_compiled_network, std::string blob_dump_path, void* context)
+-      : enable_vpu_fast_compile_(enable_vpu_fast_compile), device_id_(dev_id), num_of_threads_(num_of_threads), use_compiled_network_(use_compiled_network), blob_dump_path_(blob_dump_path), context_(context) {
++  explicit OpenVINOExecutionProviderInfo(std::string dev_type, bool enable_vpu_fast_compile, std::string dev_id, size_t num_of_threads, bool use_compiled_network, std::string blob_dump_path, void* context, bool enable_optimization, std::string optimization_workdir)
++      : enable_vpu_fast_compile_(enable_vpu_fast_compile), device_id_(dev_id), num_of_threads_(num_of_threads), use_compiled_network_(use_compiled_network), blob_dump_path_(blob_dump_path), context_(context), enable_optimization_(enable_optimization), optimization_workdir_(optimization_workdir) {
      if (dev_type == "") {
        LOGS_DEFAULT(INFO) << "[OpenVINO-EP]"
                           << "No runtime device selection option provided.";
-@@ -128,7 +130,7 @@ struct OpenVINOExecutionProviderInfo {
+@@ -129,7 +131,7 @@ struct OpenVINOExecutionProviderInfo {
                         << "Choosing Device: " << device_type_ << " , Precision: " << precision_;
    }
    OpenVINOExecutionProviderInfo() {
--    OpenVINOExecutionProviderInfo("", false, "", 0, false,"");
-+    OpenVINOExecutionProviderInfo("", false, "", 0, false,"", false, "");
+-    OpenVINOExecutionProviderInfo("", false, "", 0, false,"", NULL);
++    OpenVINOExecutionProviderInfo("", false, "", 0, false, "", NULL, false, "");
    }
  };
  
-diff --git onnxruntime/core/providers/openvino/openvino_provider_factory.cc onnxruntime/core/providers/openvino/openvino_provider_factory.cc
-index 4bb6509..0088e1c 100644
---- onnxruntime/core/providers/openvino/openvino_provider_factory.cc
-+++ onnxruntime/core/providers/openvino/openvino_provider_factory.cc
+diff --git a/onnxruntime/core/providers/openvino/openvino_provider_factory.cc b/onnxruntime/core/providers/openvino/openvino_provider_factory.cc
+index 69d2f4b..4237104 100644
+--- a/onnxruntime/core/providers/openvino/openvino_provider_factory.cc
++++ b/onnxruntime/core/providers/openvino/openvino_provider_factory.cc
 @@ -9,11 +9,13 @@ namespace onnxruntime {
  struct OpenVINOProviderFactory : IExecutionProviderFactory {
    OpenVINOProviderFactory(const char* device_type, bool enable_vpu_fast_compile,
                            const char* device_id, size_t num_of_threads,
--                          bool use_compiled_network, const char* blob_dump_path)
--      : enable_vpu_fast_compile_(enable_vpu_fast_compile), num_of_threads_(num_of_threads), use_compiled_network_(use_compiled_network) {
-+                          bool use_compiled_network, const char* blob_dump_path,
+-                          bool use_compiled_network, const char* blob_dump_path, void* context)
+-      : enable_vpu_fast_compile_(enable_vpu_fast_compile), num_of_threads_(num_of_threads), use_compiled_network_(use_compiled_network), context_(context) {
++                          bool use_compiled_network, const char* blob_dump_path, void* context,
 +                          bool enable_optimization, const char* optimization_workdir)
-+      : enable_vpu_fast_compile_(enable_vpu_fast_compile), num_of_threads_(num_of_threads), use_compiled_network_(use_compiled_network), enable_optimization_(enable_optimization) {
++      : enable_vpu_fast_compile_(enable_vpu_fast_compile), num_of_threads_(num_of_threads), use_compiled_network_(use_compiled_network), context_(context), enable_optimization_(enable_optimization) {
      device_type_ = (device_type == nullptr) ? "" : device_type;
      device_id_ = (device_id == nullptr) ? "" : device_id;
      blob_dump_path_ = (blob_dump_path == nullptr) ? "" : blob_dump_path;
@@ -201,48 +201,47 @@ index 4bb6509..0088e1c 100644
    }
    ~OpenVINOProviderFactory() override {
    }
-@@ -27,16 +29,18 @@ struct OpenVINOProviderFactory : IExecutionProviderFactory {
-   size_t num_of_threads_;
+@@ -28,16 +30,18 @@ struct OpenVINOProviderFactory : IExecutionProviderFactory {
    bool use_compiled_network_;
    std::string blob_dump_path_;
+   void *context_; 
 +  bool enable_optimization_;
 +  std::string optimization_workdir_;
  };
  
  std::unique_ptr<IExecutionProvider> OpenVINOProviderFactory::CreateProvider() {
--  OpenVINOExecutionProviderInfo info(device_type_, enable_vpu_fast_compile_, device_id_, num_of_threads_, use_compiled_network_, blob_dump_path_);
-+  OpenVINOExecutionProviderInfo info(device_type_, enable_vpu_fast_compile_, device_id_, num_of_threads_, use_compiled_network_, blob_dump_path_, enable_optimization_, optimization_workdir_);
+-  OpenVINOExecutionProviderInfo info(device_type_, enable_vpu_fast_compile_, device_id_, num_of_threads_, use_compiled_network_, blob_dump_path_, context_);
++  OpenVINOExecutionProviderInfo info(device_type_, enable_vpu_fast_compile_, device_id_, num_of_threads_, use_compiled_network_, blob_dump_path_, context_, enable_optimization_, optimization_workdir_);
    return std::make_unique<OpenVINOExecutionProvider>(info);
  }
  
  std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory_OpenVINO(
--    const char* device_type, bool enable_vpu_fast_compile, const char* device_id, size_t num_of_threads, bool use_compiled_network, const char* blob_dump_path) {
--  return std::make_shared<onnxruntime::OpenVINOProviderFactory>(device_type, enable_vpu_fast_compile, device_id, num_of_threads, use_compiled_network, blob_dump_path);
-+    const char* device_type, bool enable_vpu_fast_compile, const char* device_id, size_t num_of_threads, bool use_compiled_network, const char* blob_dump_path, bool enable_optimization, const char* optimization_workdir) {
-+  return std::make_shared<onnxruntime::OpenVINOProviderFactory>(device_type, enable_vpu_fast_compile, device_id, num_of_threads, use_compiled_network, blob_dump_path, enable_optimization, optimization_workdir);
+-    const char* device_type, bool enable_vpu_fast_compile, const char* device_id, size_t num_of_threads, bool use_compiled_network, const char* blob_dump_path, void * context) {
+-  return std::make_shared<onnxruntime::OpenVINOProviderFactory>(device_type, enable_vpu_fast_compile, device_id, num_of_threads, use_compiled_network, blob_dump_path, context);
++    const char* device_type, bool enable_vpu_fast_compile, const char* device_id, size_t num_of_threads, bool use_compiled_network, const char* blob_dump_path, void * context, bool enable_optimization, const char* optimization_workdir) {
++  return std::make_shared<onnxruntime::OpenVINOProviderFactory>(device_type, enable_vpu_fast_compile, device_id, num_of_threads, use_compiled_network, blob_dump_path, context, enable_optimization, optimization_workdir);
  }
  
  }  // namespace onnxruntime
-@@ -54,7 +58,7 @@ struct OpenVINO_Provider : Provider {
+@@ -55,7 +59,7 @@ struct OpenVINO_Provider : Provider {
  
    std::shared_ptr<IExecutionProviderFactory> CreateExecutionProviderFactory(const void* void_params) override {
      auto& params = *reinterpret_cast<const OrtOpenVINOProviderOptions*>(void_params);
--    return std::make_shared<OpenVINOProviderFactory>(params.device_type, params.enable_vpu_fast_compile, params.device_id, params.num_of_threads, params.use_compiled_network, params.blob_dump_path);
-+    return std::make_shared<OpenVINOProviderFactory>(params.device_type, params.enable_vpu_fast_compile, params.device_id, params.num_of_threads, params.use_compiled_network, params.blob_dump_path, params.enable_optimization, params.optimization_workdir);
+-    return std::make_shared<OpenVINOProviderFactory>(params.device_type, params.enable_vpu_fast_compile, params.device_id, params.num_of_threads, params.use_compiled_network, params.blob_dump_path, params.context);
++    return std::make_shared<OpenVINOProviderFactory>(params.device_type, params.enable_vpu_fast_compile, params.device_id, params.num_of_threads, params.use_compiled_network, params.blob_dump_path, params.context, params.enable_optimization, params.optimization_workdir);
    }
  
    void Shutdown() override {
- 
-diff --git onnxruntime/python/onnxruntime_pybind_schema.cc onnxruntime/python/onnxruntime_pybind_schema.cc
-index 9caddaf..9fafcaa 100644
---- onnxruntime/python/onnxruntime_pybind_schema.cc
-+++ onnxruntime/python/onnxruntime_pybind_schema.cc
+diff --git a/onnxruntime/python/onnxruntime_pybind_schema.cc b/onnxruntime/python/onnxruntime_pybind_schema.cc
+index 9caddaf..d34c2c2 100644
+--- a/onnxruntime/python/onnxruntime_pybind_schema.cc
++++ b/onnxruntime/python/onnxruntime_pybind_schema.cc
 @@ -44,7 +44,7 @@ void addGlobalSchemaFunctions(pybind11::module& m) {
              onnxruntime::CreateExecutionProviderFactory_Dnnl(1),
  #endif
  #ifdef USE_OPENVINO
 -            onnxruntime::CreateExecutionProviderFactory_OpenVINO(openvino_device_type, false, "", 8, false, ""),
-+            onnxruntime::CreateExecutionProviderFactory_OpenVINO(openvino_device_type, false, "", 8, false, "", false, ""),
++            onnxruntime::CreateExecutionProviderFactory_OpenVINO(openvino_device_type, false, "", 8, false, "", NULL, false, ""),
  #endif
  #ifdef USE_TENSORRT
              onnxruntime::CreateExecutionProviderFactory_Tensorrt(
@@ -253,11 +252,11 @@ index 9caddaf..9fafcaa 100644
 -}  // namespace onnxruntime
 \ No newline at end of file
 +}  // namespace onnxruntime
-diff --git onnxruntime/python/onnxruntime_pybind_state.cc onnxruntime/python/onnxruntime_pybind_state.cc
-index bae9a1f..422aa39 100644
---- onnxruntime/python/onnxruntime_pybind_state.cc
-+++ onnxruntime/python/onnxruntime_pybind_state.cc
-@@ -571,6 +571,17 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
+diff --git a/onnxruntime/python/onnxruntime_pybind_state.cc b/onnxruntime/python/onnxruntime_pybind_state.cc
+index f7cc9d3..22a7b21 100644
+--- a/onnxruntime/python/onnxruntime_pybind_state.cc
++++ b/onnxruntime/python/onnxruntime_pybind_state.cc
+@@ -597,6 +597,17 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
          } else if (option.first == "blob_dump_path") {
            blob_dump_path = option.second;
            params.blob_dump_path = blob_dump_path.c_str();
@@ -272,6 +271,6 @@ index bae9a1f..422aa39 100644
 +        } else if (option.first == "optimization_workdir") {
 +          std::string optimization_workdir = option.second;
 +          params.optimization_workdir = optimization_workdir.c_str();
+         }  else if (option.first == "context") {
+           params.context = (void *)(option.second.c_str());
          } else {
-           ORT_THROW("Invalid OpenVINO EP option: ", option.first);
-         }

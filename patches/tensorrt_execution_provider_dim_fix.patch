@@ -1,8 +1,8 @@
-diff --git onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
-index acf7e09..3d2ea73 100644
---- onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
-+++ onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
-@@ -1749,7 +1749,10 @@ common::Status TensorrtExecutionProvider::Compile(const std::vector<Node*>& fuse
+diff --git a/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc b/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
+index ed7f654..399e636 100644
+--- a/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
++++ b/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
+@@ -1751,7 +1751,10 @@ common::Status TensorrtExecutionProvider::Compile(const std::vector<Node*>& fuse
              for (int j = 0, end = nb_dims; j < end; ++j) {
                dimensions.d[j] = tensor_shapes[j];
              }

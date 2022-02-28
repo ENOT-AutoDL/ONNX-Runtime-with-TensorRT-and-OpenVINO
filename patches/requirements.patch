@@ -2,12 +2,11 @@ diff --git a/requirements.txt.in b/requirements.txt.in
 index 1040bd7..40650b2 100644
 --- a/requirements.txt.in
 +++ b/requirements.txt.in
-@@ -1,3 +1,8 @@
+@@ -1,3 +1,7 @@
  numpy >= @Python_NumPy_VERSION@
  protobuf
  flatbuffers
-+nvidia-cudnn == 8.2.*
-+nvidia-tensorrt == 8.0.*
-+nvidia-curand == 10.2.*
-+nvidia-cufft == 10.4.*
++sympy
++nvidia-cudnn-cu114 == 8.2.4.15
++nvidia-tensorrt == 8.4.0.6
 +openvino-dev == 2021.4.2

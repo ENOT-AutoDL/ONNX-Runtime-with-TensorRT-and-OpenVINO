@@ -6,12 +6,15 @@ BUILD_DIR=/io/build
 WHEELHOUSE_DIR=/io/wheelhouse
 CUDA_DIR=/io/devtools/cuda
 CUDA_11_1_DIR=/io/devtools/cuda-11_1
+CUDNN_DIR=/io/devtools/cudnn
 TENSOR_RT_DIR=/io/devtools/tensorrt
 ONNX_RUNTIME_DIR=/io/onnxruntime
+ORT_TRT_SUBMODULE_DIR=$ONNX_RUNTIME_DIR/cmake/external/onnx-tensorrt
+ORT_PROTOBUF_SUBMODULE_DIR=$ONNX_RUNTIME_DIR/cmake/external/protobuf
 PATCHES_DIR=/io/patches
 
 # Unpack CUDA toolkit and add executables to PATH.
-bash $DISTRIB_DIR/cuda_11.4.2_470.57.02_linux.run --silent --toolkit --toolkitpath=$CUDA_DIR
+bash $DISTRIB_DIR/cuda_11.4.4_470.82.01_linux.run --silent --toolkit --toolkitpath=$CUDA_DIR
 export PATH=$CUDA_DIR/bin:$PATH
 
 # Install CUDA 11.1 toolkit (for tests only).
@@ -23,12 +26,13 @@ export PATH=$CUDA_DIR/bin:$PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_DIR/lib64:$CUDA_11_1_DIR/lib64
 
 # Unpack cuDNN headers and libs.
+mkdir -p $CUDNN_DIR
 tar -zxvf /io/distrib/cudnn-11.4-linux-x64-v8.2.4.15.tgz -C $CUDA_DIR/include cuda/include --strip-component=2
 tar -zxvf /io/distrib/cudnn-11.4-linux-x64-v8.2.4.15.tgz -C $CUDA_DIR/lib64 cuda/lib64 --strip-component=2
 
 # Unpack TensorRT.
 mkdir -p $TENSOR_RT_DIR
-tar -zxvf $DISTRIB_DIR/TensorRT-8.0.3.4.Linux.x86_64-gnu.cuda-11.3.cudnn8.2.tar.gz -C $TENSOR_RT_DIR --strip-component=1
+tar -zxvf $DISTRIB_DIR/TensorRT-8.4.0.6.Linux.x86_64-gnu.cuda-11.6.cudnn8.3.tar.gz -C $TENSOR_RT_DIR --strip-component=1
 
 # Install OpenVINO.
 yum install yum-utils
@@ -42,15 +46,19 @@ yum -y install intel-openvino-runtime-centos7
 patchelf --remove-needed libinference_engine.so /opt/intel/openvino_2021/inference_engine/lib/intel64/libinference_engine_c_api.so
 
 # Clone ONNX Runtime.
-git clone --depth 1 --recursive --branch v1.9.1 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
+git clone --depth 1 --recursive --branch v1.10.0 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
+
+git --git-dir $ORT_TRT_SUBMODULE_DIR/.git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+git --git-dir $ORT_TRT_SUBMODULE_DIR/.git fetch --all
+git --git-dir $ORT_TRT_SUBMODULE_DIR/.git checkout 8.4-EA
 
 # Apply patches to ONNX Runtime.
-patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/manylinux_trt_openvino.patch
+patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/setup.patch
+cp $PATCHES_DIR/_libs_loader.py $ONNX_RUNTIME_DIR/onnxruntime/python/
 patch $ONNX_RUNTIME_DIR/requirements.txt.in $PATCHES_DIR/requirements.patch
 patch $ONNX_RUNTIME_DIR/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc $PATCHES_DIR/tensorrt_execution_provider_dim_fix.patch
 patch $ONNX_RUNTIME_DIR/onnxruntime/core/optimizer/constant_folding.cc $PATCHES_DIR/disable_qdq_constant_folding.patch
-patch -d $ONNX_RUNTIME_DIR -p0 < $PATCHES_DIR/openvino_execution_provider_native_support.patch
-cp $PATCHES_DIR/_libs_loader.py $ONNX_RUNTIME_DIR/onnxruntime/python/
+patch -d $ONNX_RUNTIME_DIR -p1 < $PATCHES_DIR/openvino_execution_provider_native_support.patch
 
 # Create directory for wheels.
 mkdir -p $WHEELHOUSE_DIR
@@ -89,8 +97,10 @@ for PYBIN in ${PYBINS[@]}; do
         --config RelWithDebInfo \
         --build_dir $BUILD_DIR \
         --skip_tests \
+        --skip_submodule_sync \
         --cmake_extra_defines PYTHON_INCLUDE_DIR=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
-        --cmake_extra_defines PYTHON_LIBRARY=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())")
+        --cmake_extra_defines PYTHON_LIBRARY=$(python -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
+        --cmake_extra_defines CUDA_TOOLKIT_ROOT_DIR=$CUDA_DIR
 
     # Save wheels to wheelhouse.
     cp $BUILD_DIR/RelWithDebInfo/dist/* $WHEELHOUSE_DIR
