@@ -104,6 +104,12 @@ if [[ $arch == "x86_64" ]]; then
     wget -O - "$MO_QDQ_PATCH_URL" | patch "${mo_path}/extensions/front/onnx/quantize_dequantize_linear.py"
     wget -O - "$MO_LOADER_PATCH_URL" | patch "${mo_path}/extensions/load/onnx/loader.py"
 
+    nvidia_dir="$(python -c 'import nvidia; print(next(iter(nvidia.__path__)))')"
+    cublas_lib_dir=$nvidia_dir/cublas/lib
+    ln -sf $cublas_lib_dir/libcublas.so.11 $cublas_lib_dir/libcublas.so
+    ln -sf $cublas_lib_dir/libcublasLt.so.11 $cublas_lib_dir/libcublasLt.so
+    ln -sf $cublas_lib_dir/libnvblas.so.11 $cublas_lib_dir/libnvblas.so
+
 elif [[ $arch == "aarch64" ]]; then
 
     declare -A supported_jetpacks=(["6.1"]="JetPack 4.6" ["5.1"]="JetPack 4.5")
