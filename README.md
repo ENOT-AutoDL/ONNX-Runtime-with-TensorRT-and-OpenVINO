@@ -8,7 +8,7 @@ Supports `x86_64` and `aarch64 (JetPack)` architectures.
 
  - [CUDA 11.4](https://developer.nvidia.com/cuda-downloads) (and CUDA 11.1 for tests)
  - [cuDNN 8.2](https://developer.nvidia.com/cudnn-download-survey)
- - [TensorRT 8.0](https://developer.nvidia.com/nvidia-tensorrt-download)
+ - [TensorRT 8.4](https://developer.nvidia.com/nvidia-tensorrt-download)
 
 Place CUDA (`.run`), cuDNN (`tar.gz`) and TensorRT (`tar.gz`) files into `distrib` folder.
 
@@ -32,9 +32,9 @@ There are two types of builds: `GPU` and `CPU`, if your target device has only `
 
 Wheels compiled for `x86_64` architecture depend on the following packages from NVIDIA repository:
  - `nvidia-cudnn (8.2)`
- - `nvidia-tensorrt (8.0)`
+ - `nvidia-tensorrt (8.4)`
  - `nvidia-curand (10.2)`
- - `nvidia-cufft (10.4)`
+ - `nvidia-cufft (10.5)`
 
 and `openvino (2021.4)` from standard PyPI repository.\
 To automatically install these dependencies add `--extra-index-url https://pypi.ngc.nvidia.com` to `pip install` command:
