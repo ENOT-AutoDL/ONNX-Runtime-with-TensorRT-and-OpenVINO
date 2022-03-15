@@ -6,7 +6,6 @@ BUILD_DIR=/io/build
 WHEELHOUSE_DIR=/io/wheelhouse
 CUDA_DIR=/io/devtools/cuda
 CUDA_11_1_DIR=/io/devtools/cuda-11_1
-CUDNN_DIR=/io/devtools/cudnn
 TENSOR_RT_DIR=/io/devtools/tensorrt
 ONNX_RUNTIME_DIR=/io/onnxruntime
 ORT_TRT_SUBMODULE_DIR=$ONNX_RUNTIME_DIR/cmake/external/onnx-tensorrt
@@ -26,7 +25,6 @@ export PATH=$CUDA_DIR/bin:$PATH
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CUDA_DIR/lib64:$CUDA_11_1_DIR/lib64
 
 # Unpack cuDNN headers and libs.
-mkdir -p $CUDNN_DIR
 tar -zxvf /io/distrib/cudnn-11.4-linux-x64-v8.2.4.15.tgz -C $CUDA_DIR/include cuda/include --strip-component=2
 tar -zxvf /io/distrib/cudnn-11.4-linux-x64-v8.2.4.15.tgz -C $CUDA_DIR/lib64 cuda/lib64 --strip-component=2
 
@@ -59,6 +57,9 @@ patch $ONNX_RUNTIME_DIR/requirements.txt.in $PATCHES_DIR/requirements.patch
 patch $ONNX_RUNTIME_DIR/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc $PATCHES_DIR/tensorrt_execution_provider_dim_fix.patch
 patch $ONNX_RUNTIME_DIR/onnxruntime/core/optimizer/constant_folding.cc $PATCHES_DIR/disable_qdq_constant_folding.patch
 patch -d $ONNX_RUNTIME_DIR -p1 < $PATCHES_DIR/openvino_execution_provider_native_support.patch
+cp -r $PATCHES_DIR/tensorrt_plugins $ONNX_RUNTIME_DIR/onnxruntime/core/providers/tensorrt/plugins
+patch -d $ONNX_RUNTIME_DIR -p1 < $PATCHES_DIR/tensorrt_plugins.patch
+patch $ONNX_RUNTIME_DIR/cmake/external/onnx-tensorrt/ModelImporter.cpp $PATCHES_DIR/onnx-tensorrt.patch
 
 # Create directory for wheels.
 mkdir -p $WHEELHOUSE_DIR

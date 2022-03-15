@@ -1,0 +1,38 @@
+diff --git a/cmake/onnxruntime_providers.cmake b/cmake/onnxruntime_providers.cmake
+index a82629b..c89c4cc 100644
+--- a/cmake/onnxruntime_providers.cmake
++++ b/cmake/onnxruntime_providers.cmake
+@@ -528,6 +528,10 @@ if (onnxruntime_USE_TENSORRT)
+   file(GLOB_RECURSE onnxruntime_providers_tensorrt_cc_srcs CONFIGURE_DEPENDS
+     "${ONNXRUNTIME_ROOT}/core/providers/tensorrt/*.h"
+     "${ONNXRUNTIME_ROOT}/core/providers/tensorrt/*.cc"
++    "${ONNXRUNTIME_ROOT}/core/providers/tensorrt/plugins/*.h"
++    "${ONNXRUNTIME_ROOT}/core/providers/tensorrt/plugins/*.cc"
++    "${ONNXRUNTIME_ROOT}/core/providers/tensorrt/plugins/*.cuh"
++    "${ONNXRUNTIME_ROOT}/core/providers/tensorrt/plugins/*.cu"
+     "${ONNXRUNTIME_ROOT}/core/providers/shared_library/*.h"
+     "${ONNXRUNTIME_ROOT}/core/providers/shared_library/*.cc"
+   )
+diff --git a/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc b/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
+index ed7f654..071f889 100644
+--- a/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
++++ b/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
+@@ -8,6 +8,8 @@
+ #include "core/session/onnxruntime_cxx_api.h"
+ #include "core/common/safeint.h"
+ #include "tensorrt_execution_provider.h"
++#include "core/providers/tensorrt/plugins/tensorrt_nms.h"
++#include "core/providers/tensorrt/plugins/tensorrt_roi_align.h"
+ #include "core/providers/cuda/shared_inc/cuda_call.h"
+ #include "core/providers/cuda/math/unary_elementwise_ops_impl.h"
+ #include "core/providers/cuda/gpu_data_transfer.h"
+@@ -39,6 +41,9 @@
+                           ? common::Status::OK() \
+                           : ORT_MAKE_STATUS(ONNXRUNTIME, FAIL, "CUDA error executing ", #expr))
+ 
++REGISTER_TENSORRT_PLUGIN(NonMaxSuppressionDynamicCreator);
++REGISTER_TENSORRT_PLUGIN(RoiAlignDynamicCreator);
++
+ using namespace ONNX_NAMESPACE;
+ using namespace ::onnxruntime::logging;
+ namespace fs = std::experimental::filesystem;
