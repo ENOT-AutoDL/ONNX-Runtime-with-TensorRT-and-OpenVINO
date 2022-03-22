@@ -85,9 +85,9 @@ bool RoiAlignDynamic::supportsFormatCombination( int pos
                                                , int nbInputs
                                                , int nbOutputs) noexcept {
   if (pos == 0 or pos == 1 or pos == 3) { // X, rois and output
-    return inOut[pos].type == nvinfer1::DataType::kFLOAT;
+    return inOut[pos].type == nvinfer1::DataType::kFLOAT and inOut[pos].format == nvinfer1::TensorFormat::kLINEAR;
   } else if (pos == 2) { // batch_indicies
-    return inOut[pos].type == nvinfer1::DataType::kINT32;
+    return inOut[2].type == nvinfer1::DataType::kINT32 and inOut[2].format == nvinfer1::TensorFormat::kLINEAR;
   } else {
     return false;
   }
@@ -124,27 +124,21 @@ int RoiAlignDynamic::enqueue( const nvinfer1::PluginTensorDesc* inputDesc
 
   void* top_data = outputs[0];
 
-  switch(outputDesc[0].type) {
-    case nvinfer1::DataType::kFLOAT:
-      RoIAlignForwardCUDAKernelLauncher_float( static_cast<const float*>(bottom_data) // bottom_data
-                                             , mSpatialScale // spatial_scale
-                                             , output_size // output_size
-                                             , channels // channels
-                                             , height // height
-                                             , width // width
-                                             , mOutputHeight // pooled_height
-                                             , mOutputWidth // pooled_width
-                                             , mSamplingRatio // sampling_ratio
-                                             , static_cast<const float*>(bottom_rois) // bottom_rois
-                                             , 4 // roi_cols
-                                             , static_cast<float*>(top_data)
-                                             , mMode // is_mode_avg
-                                             , static_cast<const int*>(batch_indicies) // batch_indices_ptr
-                                             , stream); // stream
-      break;
-    default:
-      break;
-  }
+  RoIAlignForwardCUDAKernelLauncher_float( static_cast<const float*>(bottom_data) // bottom_data
+                                         , mSpatialScale // spatial_scale
+                                         , output_size // output_size
+                                         , channels // channels
+                                         , height // height
+                                         , width // width
+                                         , mOutputHeight // pooled_height
+                                         , mOutputWidth // pooled_width
+                                         , mSamplingRatio // sampling_ratio
+                                         , static_cast<const float*>(bottom_rois) // bottom_rois
+                                         , 4 // roi_cols
+                                         , static_cast<float*>(top_data)
+                                         , mMode // is_mode_avg
+                                         , static_cast<const int*>(batch_indicies) // batch_indices_ptr
+                                         , stream); // stream
 
   return 0;
 }

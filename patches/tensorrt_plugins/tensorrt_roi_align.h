@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "tensorrt_plugin_helper.h"
+#include "NvInferPlugin.h"
 
 class RoiAlignDynamic : public nvinfer1::IPluginV2DynamicExt {
  public:
