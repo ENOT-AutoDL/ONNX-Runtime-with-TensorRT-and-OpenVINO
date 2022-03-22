@@ -37,12 +37,9 @@ REPO_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO
 RELEASES_URL="${REPO_URL}/releases/download"
 REPO_RAW_URL="https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO"
 MASTER_URL="${REPO_RAW_URL}/master"
-ORT_GPU_PY37_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_GPU_PY38_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_GPU_PY39_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_CPU_PY37_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_openvino-1.9.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_CPU_PY38_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_openvino-1.9.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_CPU_PY39_WHL_URL="${RELEASES_URL}/v1.9.1/onnxruntime_openvino-1.9.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY37_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY38_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY39_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
@@ -51,16 +48,6 @@ ORT_PY37_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu
 ORT_PY38_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 MO_QDQ_PATCH_URL="${MASTER_URL}/patches/mo_quantize_dequantize_linear.patch"
 MO_LOADER_PATCH_URL="${MASTER_URL}/patches/mo_loader.patch"
-
-if [[ "$DEVICE_TYPE" == "GPU" ]]; then
-    ORT_PY37_WHL_URL=$ORT_GPU_PY37_WHL_URL
-    ORT_PY38_WHL_URL=$ORT_GPU_PY38_WHL_URL
-    ORT_PY39_WHL_URL=$ORT_GPU_PY39_WHL_URL
-else
-    ORT_PY37_WHL_URL=$ORT_CPU_PY37_WHL_URL
-    ORT_PY38_WHL_URL=$ORT_CPU_PY38_WHL_URL
-    ORT_PY39_WHL_URL=$ORT_CPU_PY39_WHL_URL
-fi
 
 arch="$(uname -m)"
 python_version="$(python -c 'import platform; print(platform.python_version())')"
@@ -92,23 +79,36 @@ if [[ $arch == "x86_64" ]]; then
     pip install wheel
     pip install onnxruntime # Hack, will be removed in the future.
 
-    if [[ $python_version == "3.7"* ]]; then
-        pip install -U --force $ORT_PY37_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
-    elif [[ $python_version == "3.8"* ]]; then
-        pip install -U --force $ORT_PY38_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
-    elif [[ $python_version == "3.9"* ]]; then
-        pip install -U --force $ORT_PY39_WHL_URL --extra-index-url https://pypi.ngc.nvidia.com
+    if [[ "$DEVICE_TYPE" == "GPU" ]]; then
+        pip install nvidia-cuda-runtime-cu114==11.4.148 \
+                    nvidia-cudnn-cu114==8.2.4.15 \
+                    nvidia-cufft-cu114==10.5.2.100 \
+                    nvidia-curand-cu114==10.2.5.120 \
+                    nvidia-cublas-cu116==11.8.1.74 \
+                    --extra-index-url https://pypi.ngc.nvidia.com
+
+        # Symlinks for cublas package.
+        nvidia_dir="$(python -c 'import nvidia; print(next(iter(nvidia.__path__)))')"
+        cublas_lib_dir=$nvidia_dir/cublas/lib
+        ln -sf $cublas_lib_dir/libcublas.so.11 $cublas_lib_dir/libcublas.so
+        ln -sf $cublas_lib_dir/libcublasLt.so.11 $cublas_lib_dir/libcublasLt.so
+        ln -sf $cublas_lib_dir/libnvblas.so.11 $cublas_lib_dir/libnvblas.so
+
+        pip install nvidia-tensorrt==8.4.0.6 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
     fi
 
+    if [[ $python_version == "3.7"* ]]; then
+        pip install -U --force $ORT_PY37_WHL_URL
+    elif [[ $python_version == "3.8"* ]]; then
+        pip install -U --force $ORT_PY38_WHL_URL
+    elif [[ $python_version == "3.9"* ]]; then
+        pip install -U --force $ORT_PY39_WHL_URL
+    fi
+
+    # Patch OpenVINO.
     mo_path=$(python -c 'import mo; import pathlib; print(pathlib.Path(mo.__path__[0]).parent.absolute())')
     wget -O - "$MO_QDQ_PATCH_URL" | patch "${mo_path}/extensions/front/onnx/quantize_dequantize_linear.py"
     wget -O - "$MO_LOADER_PATCH_URL" | patch "${mo_path}/extensions/load/onnx/loader.py"
-
-    nvidia_dir="$(python -c 'import nvidia; print(next(iter(nvidia.__path__)))')"
-    cublas_lib_dir=$nvidia_dir/cublas/lib
-    ln -sf $cublas_lib_dir/libcublas.so.11 $cublas_lib_dir/libcublas.so
-    ln -sf $cublas_lib_dir/libcublasLt.so.11 $cublas_lib_dir/libcublasLt.so
-    ln -sf $cublas_lib_dir/libnvblas.so.11 $cublas_lib_dir/libnvblas.so
 
 elif [[ $arch == "aarch64" ]]; then
 
