@@ -42,7 +42,7 @@ ORT_PY38_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manyl
 ORT_PY39_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY36_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
@@ -121,7 +121,8 @@ elif [[ $arch == "aarch64" ]]; then
         exit 1
     fi
 
-    python -m pip install -U pip
+    # Update pip to latest version.
+    wget -O - https://bootstrap.pypa.io/get-pip.py | python
 
     if [[ $jetpack_revision == "6.1" ]]; then
         if [[ $python_version == "3.6"* ]]; then
@@ -129,6 +130,7 @@ elif [[ $arch == "aarch64" ]]; then
 	elif [[ $python_version == "3.7"* ]]; then
             pip install $ORT_PY37_AARCH64_JP46_WHL_URL
 	elif [[ $python_version == "3.8"* ]]; then
+            pip install sympy packaging six
             pip install $ORT_PY38_AARCH64_JP46_WHL_URL
 	fi
     elif [[ $jetpack_revision == "5.1" ]]; then
