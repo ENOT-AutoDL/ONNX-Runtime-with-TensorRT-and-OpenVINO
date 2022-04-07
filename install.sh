@@ -40,12 +40,14 @@ MASTER_URL="${REPO_RAW_URL}/master"
 ORT_PY37_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY38_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY39_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.6/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY36_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+PIP_UPDATE_URL="https://bootstrap.pypa.io/pip/get-pip.py"
+PIP_UPDATE_URL_36="https://bootstrap.pypa.io/pip/3.6/get-pip.py"
 MO_QDQ_PATCH_URL="${MASTER_URL}/patches/mo_quantize_dequantize_linear.patch"
 MO_LOADER_PATCH_URL="${MASTER_URL}/patches/mo_loader.patch"
 
@@ -122,25 +124,31 @@ elif [[ $arch == "aarch64" ]]; then
     fi
 
     # Update pip to latest version.
-    wget -O - https://bootstrap.pypa.io/get-pip.py | python
+    if [[ $python_version == "3.6"* ]]; then
+        wget -O - $PIP_UPDATE_URL_36 | python
+    else
+        wget -O - $PIP_UPDATE_URL | python
+    fi
+
+    # Install additional dependecies.
+    pip install sympy packaging six
 
     if [[ $jetpack_revision == "6.1" ]]; then
         if [[ $python_version == "3.6"* ]]; then
             pip install $ORT_PY36_AARCH64_JP46_WHL_URL
-	elif [[ $python_version == "3.7"* ]]; then
-            pip install $ORT_PY37_AARCH64_JP46_WHL_URL
-	elif [[ $python_version == "3.8"* ]]; then
-            pip install sympy packaging six
-            pip install $ORT_PY38_AARCH64_JP46_WHL_URL
-	fi
+        elif [[ $python_version == "3.7"* ]]; then
+                pip install $ORT_PY37_AARCH64_JP46_WHL_URL
+        elif [[ $python_version == "3.8"* ]]; then
+                pip install $ORT_PY38_AARCH64_JP46_WHL_URL
+        fi
     elif [[ $jetpack_revision == "5.1" ]]; then
         if [[ $python_version == "3.6"* ]]; then
             pip install $ORT_PY36_AARCH64_JP45_WHL_URL
-	elif [[ $python_version == "3.7"* ]]; then
-            pip install $ORT_PY37_AARCH64_JP45_WHL_URL
-	elif [[ $python_version == "3.8"* ]]; then
-            pip install $ORT_PY38_AARCH64_JP45_WHL_URL
-	fi
+        elif [[ $python_version == "3.7"* ]]; then
+                pip install $ORT_PY37_AARCH64_JP45_WHL_URL
+        elif [[ $python_version == "3.8"* ]]; then
+                pip install $ORT_PY38_AARCH64_JP45_WHL_URL
+        fi
         printf "Please update installed ${supported_jetpacks[$jetpack_revision]} to ${supported_jetpacks[$latest_jetpack]}.\n"
     else
         printf "Unsupported JetPack. Abort.\n"
