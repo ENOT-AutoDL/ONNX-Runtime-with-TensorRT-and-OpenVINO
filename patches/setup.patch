@@ -1,8 +1,8 @@
 diff --git a/setup.py b/setup.py
-index b28f48f..bbfc647 100644
+index 744ccd7..df681bc 100644
 --- a/setup.py
 +++ b/setup.py
-@@ -118,31 +118,49 @@ try:
+@@ -119,31 +119,49 @@ try:
          def _rewrite_ld_preload(self, to_preload):
              with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
                  if len(to_preload) > 0:
@@ -61,7 +61,7 @@ index b28f48f..bbfc647 100644
  
          def run(self):
              if is_manylinux:
-@@ -157,6 +175,7 @@ try:
+@@ -158,6 +176,7 @@ try:
                  to_preload = []
                  to_preload_cuda = []
                  to_preload_tensorrt = []
@@ -69,7 +69,7 @@ index b28f48f..bbfc647 100644
                  cuda_dependencies = []
                  args = ['patchelf', '--debug']
                  for line in result.stdout.split('\n'):
-@@ -203,9 +222,36 @@ try:
+@@ -204,9 +223,36 @@ try:
                      if len(args) > 3:
                          subprocess.run(args, check=True, stdout=subprocess.PIPE)
  
@@ -106,17 +106,11 @@ index b28f48f..bbfc647 100644
              _bdist_wheel.run(self)
              if is_manylinux and not disable_auditwheel_repair:
                  file = glob(path.join(self.dist_dir, '*linux*.whl'))[0]
-@@ -228,7 +274,12 @@ providers_cuda_or_rocm = 'libonnxruntime_providers_rocm.so' if is_rocm else 'lib
- if platform.system() == 'Linux':
-     libs = ['onnxruntime_pybind11_state.so', 'libdnnl.so.2', 'libmklml_intel.so', 'libmklml_gnu.so', 'libiomp5.so',
-             'mimalloc.so']
--    dl_libs = ['libonnxruntime_providers_shared.so']
-+    dl_libs = [
-+      'libonnxruntime_providers_shared.so',
-+      'libonnxruntime_providers_cuda.so',
-+      'libonnxruntime_providers_tensorrt.so',
-+      'libonnxruntime_providers_openvino.so',
-+    ]
+@@ -232,6 +278,7 @@ if platform.system() == 'Linux':
+     dl_libs = ['libonnxruntime_providers_shared.so']
      dl_libs.append(providers_cuda_or_rocm)
-     dl_libs.append('libonnxruntime_providers_tensorrt.so')
+     dl_libs.append(providers_tensorrt_or_migraphx)
++    dl_libs.append('libonnxruntime_providers_openvino.so')
      # DNNL, TensorRT & OpenVINO EPs are built as shared libs
+     libs.extend(['libonnxruntime_providers_shared.so'])
+     libs.extend(['libonnxruntime_providers_dnnl.so'])

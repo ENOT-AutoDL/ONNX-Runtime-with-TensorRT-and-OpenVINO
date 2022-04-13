@@ -44,7 +44,7 @@ yum -y install intel-openvino-runtime-centos7
 patchelf --remove-needed libinference_engine.so /opt/intel/openvino_2021/inference_engine/lib/intel64/libinference_engine_c_api.so
 
 # Clone ONNX Runtime.
-git clone --depth 1 --recursive --branch v1.10.0 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
+git clone --depth 1 --recursive --branch v1.11.0 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
 
 git --git-dir $ORT_TRT_SUBMODULE_DIR/.git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
 git --git-dir $ORT_TRT_SUBMODULE_DIR/.git fetch --all
@@ -53,7 +53,6 @@ git --git-dir $ORT_TRT_SUBMODULE_DIR/.git checkout 8.4-EA
 # Apply patches to ONNX Runtime.
 patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/setup.patch
 cp $PATCHES_DIR/_libs_loader.py $ONNX_RUNTIME_DIR/onnxruntime/python/
-patch $ONNX_RUNTIME_DIR/requirements.txt.in $PATCHES_DIR/requirements.patch
 patch $ONNX_RUNTIME_DIR/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc $PATCHES_DIR/tensorrt_execution_provider_dim_fix.patch
 patch $ONNX_RUNTIME_DIR/onnxruntime/core/optimizer/constant_folding.cc $PATCHES_DIR/disable_qdq_constant_folding.patch
 patch -d $ONNX_RUNTIME_DIR -p1 < $PATCHES_DIR/openvino_execution_provider_native_support.patch
@@ -79,7 +78,7 @@ for PYBIN in ${PYBINS[@]}; do
     set -u
 
     # Install dependencies.
-    $PYBIN/pip install wheel flake8 numpy==1.19.5
+    $PYBIN/pip install wheel flake8 numpy==1.19.5 flatbuffers
 
     # Directory for current build.
     mkdir -p $BUILD_DIR

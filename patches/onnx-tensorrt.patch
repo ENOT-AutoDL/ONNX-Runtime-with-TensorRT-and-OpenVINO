@@ -1,8 +1,8 @@
 diff --git a/ModelImporter.cpp b/ModelImporter.cpp
-index 7f55a51..c9c20ad 100644
+index 56eae70..2c3e81c 100644
 --- a/ModelImporter.cpp
 +++ b/ModelImporter.cpp
-@@ -499,9 +499,9 @@ bool ModelImporter::supportsOperator(const char* op_name) const
+@@ -510,9 +510,9 @@ bool ModelImporter::supportsOperator(const char* op_name) const
  
      if (is("NonMaxSuppression"))
      {
