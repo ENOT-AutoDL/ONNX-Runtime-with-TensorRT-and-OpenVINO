@@ -37,9 +37,9 @@ REPO_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO
 RELEASES_URL="${REPO_URL}/releases/download"
 REPO_RAW_URL="https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO"
 MASTER_URL="${REPO_RAW_URL}/master"
-ORT_PY37_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY38_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY39_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY37_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY38_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY39_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
@@ -78,15 +78,22 @@ if [[ $arch == "x86_64" ]]; then
     fi
 
     python -m pip install -U pip
-    pip install wheel
-    pip install onnxruntime # Hack, will be removed in the future.
+    python -m pip install wheel
+    python -m pip install onnxruntime # Hack, will be removed in the future.
+    # Install OpenVINO without redundant dependecies.
+    python -m pip install networkx~=2.5 defusedxml~=0.7.1 sympy onnx # OpenVINO mo dependecies.
+    python -m pip install --force openvino==2021.4.2 openvino-dev==2021.4.2 --no-deps
+    # Patch OpenVINO.
+    mo_path=$(python -c 'import mo; import pathlib; print(pathlib.Path(mo.__path__[0]).parent.absolute())')
+    wget -O - "$MO_QDQ_PATCH_URL" | patch "${mo_path}/extensions/front/onnx/quantize_dequantize_linear.py"
+    wget -O - "$MO_LOADER_PATCH_URL" | patch "${mo_path}/extensions/load/onnx/loader.py"
 
     if [[ "$DEVICE_TYPE" == "GPU" ]]; then
-        pip install nvidia-cuda-runtime-cu114==11.4.148 \
+        python -m pip install nvidia-cuda-runtime-cu114==11.4.148 \
                     nvidia-cudnn-cu114==8.2.4.15 \
                     nvidia-cufft-cu114==10.5.2.100 \
                     nvidia-curand-cu114==10.2.5.120 \
-                    nvidia-cublas-cu116==11.8.1.74 \
+                    nvidia-cublas-cu114==11.6.5.2 \
                     --extra-index-url https://pypi.ngc.nvidia.com
 
         # Symlinks for cublas package.
@@ -96,21 +103,16 @@ if [[ $arch == "x86_64" ]]; then
         ln -sf $cublas_lib_dir/libcublasLt.so.11 $cublas_lib_dir/libcublasLt.so
         ln -sf $cublas_lib_dir/libnvblas.so.11 $cublas_lib_dir/libnvblas.so
 
-        pip install nvidia-tensorrt==8.4.0.6 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
+        python -m pip install nvidia-tensorrt==8.4.0.6 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
     fi
 
     if [[ $python_version == "3.7"* ]]; then
-        pip install -U --force $ORT_PY37_WHL_URL
+        python -m pip install -U --force $ORT_PY37_WHL_URL
     elif [[ $python_version == "3.8"* ]]; then
-        pip install -U --force $ORT_PY38_WHL_URL
+        python -m pip install -U --force $ORT_PY38_WHL_URL
     elif [[ $python_version == "3.9"* ]]; then
-        pip install -U --force $ORT_PY39_WHL_URL
+        python -m pip install -U --force $ORT_PY39_WHL_URL
     fi
-
-    # Patch OpenVINO.
-    mo_path=$(python -c 'import mo; import pathlib; print(pathlib.Path(mo.__path__[0]).parent.absolute())')
-    wget -O - "$MO_QDQ_PATCH_URL" | patch "${mo_path}/extensions/front/onnx/quantize_dequantize_linear.py"
-    wget -O - "$MO_LOADER_PATCH_URL" | patch "${mo_path}/extensions/load/onnx/loader.py"
 
 elif [[ $arch == "aarch64" ]]; then
 
@@ -131,23 +133,23 @@ elif [[ $arch == "aarch64" ]]; then
     fi
 
     # Install additional dependecies.
-    pip install sympy packaging six
+    python -m pip install sympy packaging six
 
     if [[ $jetpack_revision == "6.1" ]]; then
         if [[ $python_version == "3.6"* ]]; then
-            pip install $ORT_PY36_AARCH64_JP46_WHL_URL
+            python -m pip install $ORT_PY36_AARCH64_JP46_WHL_URL
         elif [[ $python_version == "3.7"* ]]; then
-                pip install $ORT_PY37_AARCH64_JP46_WHL_URL
+            python -m pip install $ORT_PY37_AARCH64_JP46_WHL_URL
         elif [[ $python_version == "3.8"* ]]; then
-                pip install $ORT_PY38_AARCH64_JP46_WHL_URL
+            python -m pip install $ORT_PY38_AARCH64_JP46_WHL_URL
         fi
     elif [[ $jetpack_revision == "5.1" ]]; then
         if [[ $python_version == "3.6"* ]]; then
-            pip install $ORT_PY36_AARCH64_JP45_WHL_URL
+            python -m pip install $ORT_PY36_AARCH64_JP45_WHL_URL
         elif [[ $python_version == "3.7"* ]]; then
-                pip install $ORT_PY37_AARCH64_JP45_WHL_URL
+            python -m pip install $ORT_PY37_AARCH64_JP45_WHL_URL
         elif [[ $python_version == "3.8"* ]]; then
-                pip install $ORT_PY38_AARCH64_JP45_WHL_URL
+            python -m pip install $ORT_PY38_AARCH64_JP45_WHL_URL
         fi
         printf "Please update installed ${supported_jetpacks[$jetpack_revision]} to ${supported_jetpacks[$latest_jetpack]}.\n"
     else
