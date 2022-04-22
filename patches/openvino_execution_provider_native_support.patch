@@ -1,8 +1,8 @@
 diff --git a/include/onnxruntime/core/session/onnxruntime_c_api.h b/include/onnxruntime/core/session/onnxruntime_c_api.h
-index 12d3c54..600bac9 100644
+index 84708c2..e2ce722 100644
 --- a/include/onnxruntime/core/session/onnxruntime_c_api.h
 +++ b/include/onnxruntime/core/session/onnxruntime_c_api.h
-@@ -488,7 +488,7 @@ typedef struct OrtTensorRTProviderOptions {
+@@ -503,7 +503,7 @@ typedef struct OrtMIGraphXProviderOptions {
  */
  typedef struct OrtOpenVINOProviderOptions {
  #ifdef __cplusplus
@@ -11,7 +11,7 @@ index 12d3c54..600bac9 100644
  #endif
    /** \brief Device type string
    *
-@@ -501,6 +501,8 @@ typedef struct OrtOpenVINOProviderOptions {
+@@ -516,6 +516,8 @@ typedef struct OrtOpenVINOProviderOptions {
    unsigned char use_compiled_network;  ///< 0 = disabled, nonzero = enabled
    const char* blob_dump_path;          // path is set to empty by default
    void* context;
@@ -233,7 +233,7 @@ index 69d2f4b..4237104 100644
  
    void Shutdown() override {
 diff --git a/onnxruntime/python/onnxruntime_pybind_schema.cc b/onnxruntime/python/onnxruntime_pybind_schema.cc
-index 9caddaf..d34c2c2 100644
+index b5b8ef2..189b8c9 100644
 --- a/onnxruntime/python/onnxruntime_pybind_schema.cc
 +++ b/onnxruntime/python/onnxruntime_pybind_schema.cc
 @@ -44,7 +44,7 @@ void addGlobalSchemaFunctions(pybind11::module& m) {
@@ -245,18 +245,11 @@ index 9caddaf..d34c2c2 100644
  #endif
  #ifdef USE_TENSORRT
              onnxruntime::CreateExecutionProviderFactory_Tensorrt(
-@@ -209,4 +209,4 @@ void addOpSchemaSubmodule(py::module& m) {
-       .value("EXPERIMENTAL", ONNX_NAMESPACE::OpSchema::SupportType::EXPERIMENTAL);
- }
- }
--}  // namespace onnxruntime
-\ No newline at end of file
-+}  // namespace onnxruntime
 diff --git a/onnxruntime/python/onnxruntime_pybind_state.cc b/onnxruntime/python/onnxruntime_pybind_state.cc
-index f7cc9d3..22a7b21 100644
+index c1f3d99..5ebc2a2 100644
 --- a/onnxruntime/python/onnxruntime_pybind_state.cc
 +++ b/onnxruntime/python/onnxruntime_pybind_state.cc
-@@ -597,6 +597,17 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
+@@ -611,6 +611,17 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
          } else if (option.first == "blob_dump_path") {
            blob_dump_path = option.second;
            params.blob_dump_path = blob_dump_path.c_str();
@@ -271,6 +264,6 @@ index f7cc9d3..22a7b21 100644
 +        } else if (option.first == "optimization_workdir") {
 +          std::string optimization_workdir = option.second;
 +          params.optimization_workdir = optimization_workdir.c_str();
-         }  else if (option.first == "context") {
-           params.context = (void *)(option.second.c_str());
+         } else if (option.first == "context") {
+           params.context = (void*)(option.second.c_str());
          } else {
