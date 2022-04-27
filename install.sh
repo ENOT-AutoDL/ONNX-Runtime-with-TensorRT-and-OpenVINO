@@ -104,6 +104,7 @@ if [[ $arch == "x86_64" ]]; then
         ln -sf $cublas_lib_dir/libnvblas.so.11 $cublas_lib_dir/libnvblas.so
 
         python -m pip install nvidia-tensorrt==8.4.0.6 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
+        python -m pip install cuda-python
     fi
 
     if [[ $python_version == "3.7"* ]]; then
