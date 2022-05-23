@@ -79,7 +79,6 @@ if [[ $arch == "x86_64" ]]; then
 
     python -m pip install -U pip
     python -m pip install wheel
-    python -m pip install onnxruntime # Hack, will be removed in the future.
     # Install OpenVINO without redundant dependecies.
     python -m pip install networkx~=2.5 defusedxml~=0.7.1 sympy onnx # OpenVINO mo dependecies.
     python -m pip install --force openvino==2021.4.2 openvino-dev==2021.4.2 --no-deps
