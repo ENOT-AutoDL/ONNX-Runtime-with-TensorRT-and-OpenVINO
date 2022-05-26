@@ -82,6 +82,7 @@ if [[ $arch == "x86_64" ]]; then
     # Install OpenVINO without redundant dependecies.
     python -m pip install networkx~=2.5 defusedxml~=0.7.1 sympy onnx # OpenVINO mo dependecies.
     python -m pip install --force openvino==2021.4.2 openvino-dev==2021.4.2 --no-deps
+    python -m pip install protobuf~=3.20
     # Patch OpenVINO.
     mo_path=$(python -c 'import mo; import pathlib; print(pathlib.Path(mo.__path__[0]).parent.absolute())')
     wget -O - "$MO_QDQ_PATCH_URL" | patch "${mo_path}/extensions/front/onnx/quantize_dequantize_linear.py"
