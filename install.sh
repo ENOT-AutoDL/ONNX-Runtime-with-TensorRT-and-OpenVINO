@@ -40,6 +40,9 @@ MASTER_URL="${REPO_RAW_URL}/master"
 ORT_PY37_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY38_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY39_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY36_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY37_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY38_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
@@ -80,9 +83,10 @@ if [[ $arch == "x86_64" ]]; then
     python -m pip install -U pip
     python -m pip install wheel
     # Install OpenVINO without redundant dependecies.
-    python -m pip install networkx~=2.5 defusedxml~=0.7.1 sympy onnx # OpenVINO mo dependecies.
+    python -m pip install networkx~=2.5 defusedxml~=0.7.1 # OpenVINO mo dependecies.
     python -m pip install --force openvino==2021.4.2 openvino-dev==2021.4.2 --no-deps
-    python -m pip install protobuf~=3.20
+    python -m pip install sympy onnx protobuf~=3.0 # Additional dependecies.
+
     # Patch OpenVINO.
     mo_path=$(python -c 'import mo; import pathlib; print(pathlib.Path(mo.__path__[0]).parent.absolute())')
     wget -O - "$MO_QDQ_PATCH_URL" | patch "${mo_path}/extensions/front/onnx/quantize_dequantize_linear.py"
@@ -117,7 +121,7 @@ if [[ $arch == "x86_64" ]]; then
 
 elif [[ $arch == "aarch64" ]]; then
 
-    declare -A supported_jetpacks=(["6.1"]="JetPack 4.6" ["5.1"]="JetPack 4.5")
+    declare -A supported_jetpacks=(["7.2"]="JetPack 4.6.1" ["6.1"]="JetPack 4.6" ["5.1"]="JetPack 4.5")
     latest_jetpack="6.1"
     jetpack_revision="$(cat /etc/nv_tegra_release | sed 's/.*REVISION: \([^,]*\).*/\1/')"
 
@@ -134,9 +138,17 @@ elif [[ $arch == "aarch64" ]]; then
     fi
 
     # Install additional dependecies.
-    python -m pip install sympy packaging six
+    python -m pip install sympy packaging six protobuf~=3.0
 
-    if [[ $jetpack_revision == "6.1" ]]; then
+    if [[ $jetpack_revision == "7.2" ]]; then
+        if [[ $python_version == "3.6"* ]]; then
+            python -m pip install $ORT_PY36_AARCH64_JP461_WHL_URL
+        elif [[ $python_version == "3.7"* ]]; then
+            python -m pip install $ORT_PY37_AARCH64_JP461_WHL_URL
+        elif [[ $python_version == "3.8"* ]]; then
+            python -m pip install $ORT_PY38_AARCH64_JP461_WHL_URL
+        fi
+    elif [[ $jetpack_revision == "6.1" ]]; then
         if [[ $python_version == "3.6"* ]]; then
             python -m pip install $ORT_PY36_AARCH64_JP46_WHL_URL
         elif [[ $python_version == "3.7"* ]]; then
