@@ -1,16 +1,17 @@
 diff --git a/ModelImporter.cpp b/ModelImporter.cpp
-index 56eae70..2c3e81c 100644
+index 93c5614..393d187 100644
 --- a/ModelImporter.cpp
 +++ b/ModelImporter.cpp
-@@ -510,9 +510,9 @@ bool ModelImporter::supportsOperator(const char* op_name) const
+@@ -509,10 +509,10 @@ bool ModelImporter::supportsOperator(const char* op_name) const
  
      if (is("NonMaxSuppression"))
      {
 -        return false;
 +        return true;
      }
--    if (is("EfficientNMS_TRT") || is("PyramidROIAlign_TRT") || is("MultilevelCropAndResize_TRT"))
-+    if (is("EfficientNMS_TRT") || is("PyramidROIAlign_TRT") || is("MultilevelCropAndResize_TRT") || is("RoiAlign"))
+     if (is("EfficientNMS_TRT") || is("PyramidROIAlign_TRT") || is("MultilevelCropAndResize_TRT")
+-        || is("DisentangledAttention_TRT"))
++        || is("DisentangledAttention_TRT") || is("RoiAlign"))
      {
          return true;
      }

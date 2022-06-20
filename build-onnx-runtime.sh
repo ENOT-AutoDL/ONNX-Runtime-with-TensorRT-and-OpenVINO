@@ -30,7 +30,7 @@ tar -zxvf /io/distrib/cudnn-11.4-linux-x64-v8.2.4.15.tgz -C $CUDA_DIR/lib64 cuda
 
 # Unpack TensorRT.
 mkdir -p $TENSOR_RT_DIR
-tar -zxvf $DISTRIB_DIR/TensorRT-8.4.0.6.Linux.x86_64-gnu.cuda-11.6.cudnn8.3.tar.gz -C $TENSOR_RT_DIR --strip-component=1
+tar -zxvf $DISTRIB_DIR/TensorRT-8.4.1.5.Linux.x86_64-gnu.cuda-11.6.cudnn8.4.tar.gz -C $TENSOR_RT_DIR --strip-component=1
 
 # Install OpenVINO.
 yum install yum-utils
@@ -44,11 +44,11 @@ yum -y install intel-openvino-runtime-centos7
 patchelf --remove-needed libinference_engine.so /opt/intel/openvino_2021/inference_engine/lib/intel64/libinference_engine_c_api.so
 
 # Clone ONNX Runtime.
-git clone --depth 1 --recursive --branch v1.11.0 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
+git clone --depth 1 --recursive --branch v1.11.1 https://github.com/microsoft/onnxruntime $ONNX_RUNTIME_DIR
 
 git --git-dir $ORT_TRT_SUBMODULE_DIR/.git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
 git --git-dir $ORT_TRT_SUBMODULE_DIR/.git fetch --all
-git --git-dir $ORT_TRT_SUBMODULE_DIR/.git checkout 8.4-EA
+git --git-dir $ORT_TRT_SUBMODULE_DIR/.git checkout 8.4-GA
 
 # Apply patches to ONNX Runtime.
 patch $ONNX_RUNTIME_DIR/setup.py $PATCHES_DIR/setup.patch
