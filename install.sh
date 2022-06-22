@@ -37,9 +37,9 @@ REPO_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO
 RELEASES_URL="${REPO_URL}/releases/download"
 REPO_RAW_URL="https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO"
 MASTER_URL="${REPO_RAW_URL}/master"
-ORT_PY37_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY38_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY39_WHL_URL="${RELEASES_URL}/v1.11.0/onnxruntime_gpu-1.11.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY37_WHL_URL="${RELEASES_URL}/v1.11.1/onnxruntime_gpu-1.11.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY38_WHL_URL="${RELEASES_URL}/v1.11.1/onnxruntime_gpu-1.11.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+ORT_PY39_WHL_URL="${RELEASES_URL}/v1.11.1/onnxruntime_gpu-1.11.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 ORT_PY36_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY37_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ORT_PY38_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
@@ -85,7 +85,7 @@ if [[ $arch == "x86_64" ]]; then
     # Install OpenVINO without redundant dependecies.
     python -m pip install networkx~=2.5 defusedxml~=0.7.1 # OpenVINO mo dependecies.
     python -m pip install --force openvino==2021.4.2 openvino-dev==2021.4.2 --no-deps
-    python -m pip install sympy onnx protobuf~=3.0 # Additional dependecies.
+    python -m pip install sympy onnx # Additional dependecies.
 
     # Patch OpenVINO.
     mo_path=$(python -c 'import mo; import pathlib; print(pathlib.Path(mo.__path__[0]).parent.absolute())')
@@ -107,7 +107,7 @@ if [[ $arch == "x86_64" ]]; then
         ln -sf $cublas_lib_dir/libcublasLt.so.11 $cublas_lib_dir/libcublasLt.so
         ln -sf $cublas_lib_dir/libnvblas.so.11 $cublas_lib_dir/libnvblas.so
 
-        python -m pip install nvidia-tensorrt==8.4.0.6 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
+        python -m pip install nvidia-tensorrt==8.4.1.5 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
         python -m pip install cuda-python
     fi
 
@@ -118,6 +118,8 @@ if [[ $arch == "x86_64" ]]; then
     elif [[ $python_version == "3.9"* ]]; then
         python -m pip install -U --force $ORT_PY39_WHL_URL
     fi
+
+    python -m install protobuf~=3.0 # Install protobuf 3.x.
 
 elif [[ $arch == "aarch64" ]]; then
 
