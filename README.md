@@ -38,7 +38,7 @@ and `openvino (2021.4)` from standard PyPI repository.\
 Compiled wheels do not explicitly depend on NVIDIA packages, you can install them by the following commands:
 ```
 pip install nvidia-cuda-runtime-cu114 nvidia-cudnn-cu114 nvidia-cufft-cu114 nvidia-curand-cu114 nvidia-cublas-cu114 --extra-index-url https://pypi.ngc.nvidia.com
-pip install nvidia-tensorrt==8.4.0.6 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
+pip install nvidia-tensorrt==8.4.1.5 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
 ```
 
 The **recommended way** to install this ONNX Runtime package is to use our `install.sh` script,
