@@ -119,7 +119,7 @@ if [[ $arch == "x86_64" ]]; then
         python -m pip install -U --force $ORT_PY39_WHL_URL
     fi
 
-    python -m install protobuf~=3.0 # Install protobuf 3.x.
+    python -m pip install protobuf~=3.0 # Install protobuf 3.x.
 
 elif [[ $arch == "aarch64" ]]; then
 
