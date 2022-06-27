@@ -123,8 +123,8 @@ if [[ $arch == "x86_64" ]]; then
 
 elif [[ $arch == "aarch64" ]]; then
 
-    declare -A supported_jetpacks=(["7.2"]="JetPack 4.6.1" ["6.1"]="JetPack 4.6" ["5.1"]="JetPack 4.5")
-    latest_jetpack="6.1"
+    declare -A supported_jetpacks=(["7.2"]="JetPack 4.6.2" ["7.1"]="JetPack 4.6.1" ["6.1"]="JetPack 4.6" ["5.1"]="JetPack 4.5")
+    latest_jetpack="7.2"
     jetpack_revision="$(cat /etc/nv_tegra_release | sed 's/.*REVISION: \([^,]*\).*/\1/')"
 
     if ! [[ "$python_version" =~ 3\.[6-8]\.* ]]; then
@@ -142,7 +142,7 @@ elif [[ $arch == "aarch64" ]]; then
     # Install additional dependecies.
     python -m pip install sympy packaging six protobuf~=3.0
 
-    if [[ $jetpack_revision == "7.2" ]]; then
+    if [[ $jetpack_revision == "7.2" || $jetpack_revision == "7.1" ]]; then
         if [[ $python_version == "3.6"* ]]; then
             python -m pip install $ORT_PY36_AARCH64_JP461_WHL_URL
         elif [[ $python_version == "3.7"* ]]; then
