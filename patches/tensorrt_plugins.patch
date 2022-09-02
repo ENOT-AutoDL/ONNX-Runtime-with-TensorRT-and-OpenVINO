@@ -1,8 +1,8 @@
 diff --git a/cmake/onnxruntime_providers.cmake b/cmake/onnxruntime_providers.cmake
-index 8f74ffb..66e2152 100644
+index 77eac4b..b1d5664 100644
 --- a/cmake/onnxruntime_providers.cmake
 +++ b/cmake/onnxruntime_providers.cmake
-@@ -609,6 +609,10 @@ if (onnxruntime_USE_TENSORRT)
+@@ -643,6 +643,10 @@ if (onnxruntime_USE_TENSORRT)
    file(GLOB_RECURSE onnxruntime_providers_tensorrt_cc_srcs CONFIGURE_DEPENDS
      "${ONNXRUNTIME_ROOT}/core/providers/tensorrt/*.h"
      "${ONNXRUNTIME_ROOT}/core/providers/tensorrt/*.cc"
@@ -14,7 +14,7 @@ index 8f74ffb..66e2152 100644
      "${ONNXRUNTIME_ROOT}/core/providers/shared_library/*.cc"
    )
 diff --git a/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc b/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
-index 92f08c4..b457b5c 100644
+index 1fc3086..848c1fd 100644
 --- a/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
 +++ b/onnxruntime/core/providers/tensorrt/tensorrt_execution_provider.cc
 @@ -9,6 +9,7 @@

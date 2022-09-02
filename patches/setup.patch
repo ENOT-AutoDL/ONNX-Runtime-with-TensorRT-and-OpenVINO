@@ -1,14 +1,25 @@
 diff --git a/setup.py b/setup.py
-index 744ccd7..df681bc 100644
+index 0805a59..ab9128b 100644
 --- a/setup.py
 +++ b/setup.py
-@@ -119,31 +119,49 @@ try:
+@@ -102,6 +102,7 @@ manylinux_tags = [
+     "manylinux2014_ppc64le",
+     "manylinux2014_s390x",
+     "manylinux_2_27_x86_64",
++    "manylinux_2_28_x86_64",
+ ]
+ is_manylinux = environ.get("AUDITWHEEL_PLAT", None) in manylinux_tags
+ 
+@@ -141,33 +142,51 @@ try:
+                 self.root_is_pure = False
+ 
          def _rewrite_ld_preload(self, to_preload):
-             with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
+-            with open("onnxruntime/capi/_ld_preload.py", "a") as f:
++            with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
                  if len(to_preload) > 0:
--                    f.write('from ctypes import CDLL, RTLD_GLOBAL\n')
+-                    f.write("from ctypes import CDLL, RTLD_GLOBAL\n")
 -                    for library in to_preload:
--                        f.write('_{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split('.')[0], library))
+-                        f.write('_{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split(".")[0], library))
 +                    f.write('from ._libs_loader import load_shared_libraries\n')
 +                    f.write('libraries = {}\n'.format(to_preload))
 +                    f.write('load_shared_libraries(libraries)  # Loads and caches libraries (/etc/ld.so.cache).\n')
@@ -16,34 +27,42 @@ index 744ccd7..df681bc 100644
 +                    f.write('\n')
  
          def _rewrite_ld_preload_cuda(self, to_preload):
-             with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
+-            with open("onnxruntime/capi/_ld_preload.py", "a") as f:
++            with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
                  if len(to_preload) > 0:
--                    f.write('from ctypes import CDLL, RTLD_GLOBAL\n')
-                     f.write('try:\n')
+-                    f.write("from ctypes import CDLL, RTLD_GLOBAL\n")
+-                    f.write("try:\n")
 -                    for library in to_preload:
--                        f.write('    _{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split('.')[0], library))
+-                        f.write('    _{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split(".")[0], library))
+-                    f.write("except OSError:\n")
+-                    f.write("    import os\n")
++                    f.write('try:\n')
 +                    f.write('    from ._libs_loader import load_shared_libraries\n')
 +                    f.write('    libraries = {}\n'.format(to_preload))
 +                    f.write('    load_shared_libraries(libraries)  # Loads and caches libraries (/etc/ld.so.cache).\n')
 +                    f.write('    load_shared_libraries(libraries)  # Loads libraries from cache with proper names.\n')
-                     f.write('except OSError:\n')
-                     f.write('    import os\n')
++                    f.write('except OSError:\n')
++                    f.write('    import os\n')
                      f.write('    os.environ["ORT_CUDA_UNAVAILABLE"] = "1"\n')
 +                    f.write('\n')
  
          def _rewrite_ld_preload_tensorrt(self, to_preload):
-             with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
+-            with open("onnxruntime/capi/_ld_preload.py", "a") as f:
++            with open('onnxruntime/capi/_ld_preload.py', 'a') as f:
                  if len(to_preload) > 0:
--                    f.write('from ctypes import CDLL, RTLD_GLOBAL\n')
-                     f.write('try:\n')
+-                    f.write("from ctypes import CDLL, RTLD_GLOBAL\n")
+-                    f.write("try:\n")
 -                    for library in to_preload:
--                        f.write('    _{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split('.')[0], library))
+-                        f.write('    _{} = CDLL("{}", mode=RTLD_GLOBAL)\n'.format(library.split(".")[0], library))
+-                    f.write("except OSError:\n")
+-                    f.write("    import os\n")
++                    f.write('try:\n')
 +                    f.write('    from ._libs_loader import load_shared_libraries\n')
 +                    f.write('    libraries = {}\n'.format(to_preload))
 +                    f.write('    load_shared_libraries(libraries)  # Loads and caches libraries (/etc/ld.so.cache).\n')
 +                    f.write('    load_shared_libraries(libraries)  # Loads libraries from cache with proper names.\n')
-                     f.write('except OSError:\n')
-                     f.write('    import os\n')
++                    f.write('except OSError:\n')
++                    f.write('    import os\n')
                      f.write('    os.environ["ORT_TENSORRT_UNAVAILABLE"] = "1"\n')
 +                    f.write('\n')
 +
@@ -61,31 +80,29 @@ index 744ccd7..df681bc 100644
  
          def run(self):
              if is_manylinux:
-@@ -158,6 +176,7 @@ try:
+@@ -189,6 +208,7 @@ try:
                  to_preload = []
                  to_preload_cuda = []
                  to_preload_tensorrt = []
 +                to_preload_openvino = []
                  cuda_dependencies = []
-                 args = ['patchelf', '--debug']
-                 for line in result.stdout.split('\n'):
-@@ -204,9 +223,36 @@ try:
-                     if len(args) > 3:
-                         subprocess.run(args, check=True, stdout=subprocess.PIPE)
+                 args = ["patchelf", "--debug"]
+                 for line in result.stdout.split("\n"):
+@@ -259,18 +279,33 @@ try:
  
-+                dest = 'onnxruntime/capi/libonnxruntime_providers_openvino.so'
-+                if path.isfile(dest):
-+                    result = subprocess.run(['patchelf', '--print-needed', dest],
-+                                            check=True, stdout=subprocess.PIPE, universal_newlines=True)
+                 dest = "onnxruntime/capi/libonnxruntime_providers_openvino.so"
+                 if path.isfile(dest):
+-                    subprocess.run(
+-                        ["patchelf", "--set-rpath", "$ORIGIN", dest, "--force-rpath"],
++                    result = subprocess.run(
++                        ["patchelf", "--print-needed", dest],
+                         check=True,
+                         stdout=subprocess.PIPE,
+                         universal_newlines=True,
+                     )
 +                    openvino_dependencies = [
-+                        'libtbbmalloc.so',
-+                        'libinference_engine.so',
-+                        'libonnx_importer.so',
-+                        'libonnx_proto.so',
-+                        'libtbb.so',
-+                        'libinference_engine_tranformations.so',
-+                        'libngraph.so',
-+                        'libprotobuf.so',
++                        "libopenvino.so",
++                        "libopenvino_onnx_frontend.so",
 +                    ]
 +                    args = ['patchelf', '--debug']
 +                    for line in result.stdout.split('\n'):
@@ -97,20 +114,22 @@ index 744ccd7..df681bc 100644
 +                    args.append(dest)
 +                    if len(args) > 3:
 +                        subprocess.run(args, check=True, stdout=subprocess.PIPE)
-+
+ 
                  self._rewrite_ld_preload(to_preload)
                  self._rewrite_ld_preload_cuda(to_preload_cuda)
                  self._rewrite_ld_preload_tensorrt(to_preload_tensorrt)
 +                self._rewrite_ld_preload_openvino(to_preload_openvino)
-+
              _bdist_wheel.run(self)
-             if is_manylinux and not disable_auditwheel_repair:
-                 file = glob(path.join(self.dist_dir, '*linux*.whl'))[0]
-@@ -232,6 +278,7 @@ if platform.system() == 'Linux':
-     dl_libs = ['libonnxruntime_providers_shared.so']
+-            if is_manylinux and not disable_auditwheel_repair and not is_openvino:
++            if is_manylinux and not disable_auditwheel_repair: #and not is_openvino:
+                 assert self.dist_dir is not None
+                 file = glob(path.join(self.dist_dir, "*linux*.whl"))[0]
+                 logger.info("repairing %s for manylinux1", file)
+@@ -315,6 +350,7 @@ if platform.system() == "Linux":
+     dl_libs = ["libonnxruntime_providers_shared.so"]
      dl_libs.append(providers_cuda_or_rocm)
      dl_libs.append(providers_tensorrt_or_migraphx)
-+    dl_libs.append('libonnxruntime_providers_openvino.so')
++    dl_libs.append(providers_openvino)
      # DNNL, TensorRT & OpenVINO EPs are built as shared libs
-     libs.extend(['libonnxruntime_providers_shared.so'])
-     libs.extend(['libonnxruntime_providers_dnnl.so'])
+     libs.extend(["libonnxruntime_providers_shared.so"])
+     libs.extend(["libonnxruntime_providers_dnnl.so"])

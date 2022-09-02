@@ -25,7 +25,7 @@ except ImportError:
 
 try:
     import openvino
-    _EXTRA_LIB_PATH.append(next(iter(openvino.__path__)))
+    _EXTRA_LIB_PATH.append(next(iter(openvino.__path__)) + '/libs')
 except ImportError:
     pass
 
