@@ -6,8 +6,8 @@ Supports `x86_64` and `aarch64 (JetPack)` architectures.
 
 ## Build requirements
 
- - [CUDA 11.4](https://developer.nvidia.com/cuda-downloads) (and CUDA 11.1 for tests)
- - [cuDNN 8.2](https://developer.nvidia.com/cudnn-download-survey)
+ - [CUDA 11.6](https://developer.nvidia.com/cuda-downloads) (and CUDA 11.1 for tests)
+ - [cuDNN 8.4](https://developer.nvidia.com/cudnn-download-survey)
  - [TensorRT 8.4](https://developer.nvidia.com/nvidia-tensorrt-download)
 
 Place CUDA (`.run`), cuDNN (`tar.gz`) and TensorRT (`tar.gz`) files into `distrib` folder.
@@ -29,16 +29,25 @@ Wheels will be placed into `wheelhouse` folder.
 ## Using
 
 Wheels compiled for `x86_64` architecture depend on the following packages from NVIDIA repository:
- - `nvidia-cudnn (8.2)`
+ - `nvidia-cuda-runtime-cu116 (11.6)`
+ - `nvidia-cublas-cu116 (11.9)`
+ - `nvidia-cudnn-cu116 (8.4)`
+ - `nvidia-cufft-cu116 (10.7)`
+ - `nvidia-curand-cu116 (10.2)`
  - `nvidia-tensorrt (8.4)`
- - `nvidia-curand (10.2)`
- - `nvidia-cufft (10.5)`
 
-and `openvino (2021.4)` from standard PyPI repository.\
+and `openvino (2022.1)` from standard PyPI repository.\
 Compiled wheels do not explicitly depend on NVIDIA packages, you can install them by the following commands:
 ```
-pip install nvidia-cuda-runtime-cu114 nvidia-cudnn-cu114 nvidia-cufft-cu114 nvidia-curand-cu114 nvidia-cublas-cu114 --extra-index-url https://pypi.ngc.nvidia.com
-pip install nvidia-tensorrt==8.4.1.5 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
+pip install --no-deps --extra-index-url https://pypi.ngc.nvidia.com \
+    nvidia-cuda-runtime-cu116==11.6.55 \
+    nvidia-cudnn-cu116==8.4.0.27 \
+    nvidia-cufft-cu116==10.7.2.124 \
+    nvidia-curand-cu116==10.2.9.124 \
+    nvidia-cublas-cu116==11.9.2.110 \
+    nvidia-tensorrt==8.4.3.1
+
+pip install openvino==2022.1 openvino-dev==2022.1
 ```
 
 The **recommended way** to install this ONNX Runtime package is to use our `install.sh` script,
