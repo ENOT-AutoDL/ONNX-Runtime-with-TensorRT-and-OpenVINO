@@ -149,7 +149,7 @@ elif [[ $arch == "aarch64" ]]; then
     fi
 
     if [[ $jetpack_release == "35" ]]; then  # JetPack 5.x
-        if ! [[ "$python_version" =~ 3\.[8-9]\.* ]]; then
+        if ! [[ "$python_version" == "3.8"* ]]; then
             printf "Unsupported python version. Abort.\n"
             exit 1
         fi
