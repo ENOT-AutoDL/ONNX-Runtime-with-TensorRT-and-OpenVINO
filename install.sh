@@ -72,6 +72,8 @@ TRT_PY39_AARCH64_JP_35_1_0_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/tensorrt-8.
 PIP_UPDATE_URL="https://bootstrap.pypa.io/pip/get-pip.py"
 PIP_UPDATE_URL_36="https://bootstrap.pypa.io/pip/3.6/get-pip.py"
 
+ONNXOPTIMIZER_PY36_AARCH64_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxoptimizer-0.3.1-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ONNXOPTIMIZER_PY37_AARCH64_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxoptimizer-0.3.1-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ONNXOPTIMIZER_PY38_AARCH64_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxoptimizer-0.3.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 ONNXOPTIMIZER_PY39_AARCH64_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxoptimizer-0.3.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 
@@ -159,69 +161,45 @@ elif [[ $arch == "aarch64" ]]; then
 
         if [[ $jetpack_revision == "1.0" ]]; then  # JP 5.0.2 (35.1.0)
             python3 -m pip install cuda-python~=11.6.0
-            if [[ $python_version == "3.8"* ]]; then
-                python3 -m pip install --force-reinstall $ONNXOPTIMIZER_PY38_AARCH64_WHL_URL
-                python3 -m pip install --force-reinstall $TRT_PY38_AARCH64_JP_35_1_0_WHL_URL
-                python3 -m pip install --force-reinstall $ORT_PY38_AARCH64_JP_35_1_0_WHL_URL
-            elif [[ $python_version == "3.9"* ]]; then
-                python3 -m pip install --force-reinstall $ONNXOPTIMIZER_PY39_AARCH64_WHL_URL
-                python3 -m pip install --force-reinstall $TRT_PY39_AARCH64_JP_35_1_0_WHL_URL
-                python3 -m pip install --force-reinstall $ORT_PY39_AARCH64_JP_35_1_0_WHL_URL
-            fi
+            python3 -m pip install $ONNXOPTIMIZER_PY38_AARCH64_WHL_URL
+            python3 -m pip install $TRT_PY38_AARCH64_JP_35_1_0_WHL_URL
+            python3 -m pip install --force-reinstall $ORT_PY38_AARCH64_JP_35_1_0_WHL_URL
         fi
 
         # Install additional dependecies.
         python3 -m pip install six protobuf~=3.0
 
     elif [[ $jetpack_release == "32" ]]; then  # JetPack 4.x
-        if ! [[ "$python_version" =~ 3\.[6-8]\.* ]]; then
+        if ! [[ "$python_version" == "3.6"* ]]; then
             printf "Unsupported python version. Abort.\n"
             exit 1
         fi
 
         # Update pip to latest version.
-        if [[ $python_version == "3.6"* ]]; then
-            wget -O - $PIP_UPDATE_URL_36 | python3
-        else
-            wget -O - $PIP_UPDATE_URL | python3
-        fi
+        wget -O - $PIP_UPDATE_URL_36 | python3
+
+        # Install ONNX Optimizer.
+        python3 -m pip install onnx~=1.11.0
+        python3 -m pip install $ONNXOPTIMIZER_PY36_AARCH64_WHL_URL
 
         if [[ $jetpack_revision == "5.1" ]]; then  # JP 4.5.1 (32.5.1)
-            if [[ $python_version == "3.6"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_5_1_WHL_URL
-            elif [[ $python_version == "3.7"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY37_AARCH64_JP_32_5_1_WHL_URL
-            elif [[ $python_version == "3.8"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY38_AARCH64_JP_32_5_1_WHL_URL
-            fi
+            python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_5_1_WHL_URL
         elif [[ $jetpack_revision == "6.1" ]]; then  # JP 4.6.0 (32.6.1)
-            if [[ $python_version == "3.6"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_6_1_WHL_URL
-            elif [[ $python_version == "3.7"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY37_AARCH64_JP_32_6_1_WHL_URL
-            elif [[ $python_version == "3.8"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY38_AARCH64_JP_32_6_1_WHL_URL
-            fi
+            python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_6_1_WHL_URL
         elif [[ $jetpack_revision == "7.1" ]]; then  # JP 4.6.1 (32.7.1)
-            if [[ $python_version == "3.6"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_7_1_WHL_URL
-            elif [[ $python_version == "3.7"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY37_AARCH64_JP_32_7_1_WHL_URL
-            elif [[ $python_version == "3.8"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY38_AARCH64_JP_32_7_1_WHL_URL
-            fi
+            python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_7_1_WHL_URL
         elif [[ $jetpack_revision == "7.2" ]]; then  # JP 4.6.2 (32.7.2)
-            if [[ $python_version == "3.6"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_7_2_WHL_URL
-            elif [[ $python_version == "3.7"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY37_AARCH64_JP_32_7_2_WHL_URL
-            elif [[ $python_version == "3.8"* ]]; then
-                python3 -m pip install --force-reinstall $ORT_PY38_AARCH64_JP_32_7_2_WHL_URL
-            fi
+            python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_7_2_WHL_URL
         fi
 
         # Install additional dependecies.
         python3 -m pip install sympy packaging six protobuf~=3.0
+
+        # Link nvidia-tensorrt package.
+        site_packages_dir="$(python3 -c 'import site; print(site.getsitepackages()[0])')"
+        if ! [[ "$site_packages_dir" == "/usr/local/lib/python3.6/dist-packages" ]]; then
+            ln -sf /usr/lib/python3.6/dist-packages/tensorrt $site_packages_dir
+        fi
     fi
 
 else
