@@ -37,40 +37,60 @@ REPO_URL="https://github.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO
 RELEASES_URL="${REPO_URL}/releases/download"
 REPO_RAW_URL="https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-TensorRT-and-OpenVINO"
 MASTER_URL="${REPO_RAW_URL}/master"
-ORT_PY37_WHL_URL="${RELEASES_URL}/v1.11.1/onnxruntime_gpu-1.11.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY38_WHL_URL="${RELEASES_URL}/v1.11.1/onnxruntime_gpu-1.11.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY39_WHL_URL="${RELEASES_URL}/v1.11.1/onnxruntime_gpu-1.11.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
-ORT_PY36_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY37_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY38_AARCH64_JP461_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY36_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY37_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY38_AARCH64_JP46_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY36_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY37_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
-ORT_PY38_AARCH64_JP45_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+
+# x86_64
+ORT_PY37_x86_64_WHL_URL="${RELEASES_URL}/v1.12.1/onnxruntime_gpu-1.12.1-cp37-cp37m-manylinux_2_28_x86_64.whl"
+ORT_PY38_x86_64_WHL_URL="${RELEASES_URL}/v1.12.1/onnxruntime_gpu-1.12.1-cp38-cp38-manylinux_2_28_x86_64.whl"
+ORT_PY39_x86_64_WHL_URL="${RELEASES_URL}/v1.12.1/onnxruntime_gpu-1.12.1-cp39-cp39-manylinux_2_28_x86_64.whl"
+
+# JP 4.5.1 (32.5.1)
+ORT_PY36_AARCH64_JP_32_5_1_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY37_AARCH64_JP_32_5_1_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY38_AARCH64_JP_32_5_1_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+
+# JP 4.6.0 (32.6.1)
+ORT_PY36_AARCH64_JP_32_6_1_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY37_AARCH64_JP_32_6_1_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY38_AARCH64_JP_32_6_1_WHL_URL="${RELEASES_URL}/v1.10.0/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+
+# JP 4.6.1 (32.7.1)
+ORT_PY36_AARCH64_JP_32_7_1_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY37_AARCH64_JP_32_7_1_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY38_AARCH64_JP_32_7_1_WHL_URL="${RELEASES_URL}/v1.10.0_JP461/onnxruntime_gpu-1.10.0-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+
+# JP 4.6.2 (32.7.2)
+ORT_PY36_AARCH64_JP_32_7_2_WHL_URL="$ORT_PY36_AARCH64_JP_32_7_1_WHL_URL"
+ORT_PY37_AARCH64_JP_32_7_2_WHL_URL="$ORT_PY37_AARCH64_JP_32_7_1_WHL_URL"
+ORT_PY38_AARCH64_JP_32_7_2_WHL_URL="$ORT_PY38_AARCH64_JP_32_7_1_WHL_URL"
+
+# JP 5.0.2 (35.1.0)
+ORT_PY38_AARCH64_JP_35_1_0_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxruntime_gpu-1.12.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ORT_PY39_AARCH64_JP_35_1_0_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxruntime_gpu-1.12.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+TRT_PY38_AARCH64_JP_35_1_0_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/tensorrt-8.4.1.5-cp38-none-linux_aarch64.whl"
+TRT_PY39_AARCH64_JP_35_1_0_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/tensorrt-8.4.1.5-cp39-none-linux_aarch64.whl"
+
 PIP_UPDATE_URL="https://bootstrap.pypa.io/pip/get-pip.py"
 PIP_UPDATE_URL_36="https://bootstrap.pypa.io/pip/3.6/get-pip.py"
-MO_QDQ_PATCH_URL="${MASTER_URL}/patches/mo_quantize_dequantize_linear.patch"
-MO_LOADER_PATCH_URL="${MASTER_URL}/patches/mo_loader.patch"
+
+ONNXOPTIMIZER_PY36_AARCH64_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxoptimizer-0.3.1-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ONNXOPTIMIZER_PY37_AARCH64_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxoptimizer-0.3.1-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ONNXOPTIMIZER_PY38_AARCH64_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxoptimizer-0.3.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
+ONNXOPTIMIZER_PY39_AARCH64_WHL_URL="${RELEASES_URL}/v1.12.1_JP35.1.0/onnxoptimizer-0.3.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
 
 arch="$(uname -m)"
 python_version="$(python3 -c 'import platform; print(platform.python_version())')"
 
-if ! [[ -x "$(command -v patch)" ]]; then
-    printf "patch command is not installed, install it before running this script (ubuntu: apt install patch). Abort.\n"
-    exit 1
-fi
 
 if [[ $arch == "x86_64" ]]; then
 
     if [[ $CHECK_DRIVER_VERSION == 1 && $DEVICE_TYPE == "GPU" ]]; then
         driver_version="$(nvidia-smi --query-gpu=driver_version --format=csv,noheader)"
-        minimal_driver_version='460.27.04'
+        minimal_driver_version='510.39.01'
 
         if [[ $(ver "$driver_version") < $(ver "$minimal_driver_version") ]]; then
             printf "NVIDIA driver version should be %s or higher.\n" "$minimal_driver_version"
             printf "Current NVIDIA driver version %s. Abort.\n" "$driver_version"
+            printf "Or use older versions of this script: commit 98bed531b7c408370febd88c106beac4ca0518d7."
             exit 1
         fi
     fi
@@ -80,96 +100,112 @@ if [[ $arch == "x86_64" ]]; then
         exit 1
     fi
 
-    python3 -m pip install -U pip
+    python3 -m pip install --upgrade pip
     python3 -m pip install wheel
     # Install OpenVINO without redundant dependecies.
-    python3 -m pip install networkx~=2.5 defusedxml~=0.7.1 # OpenVINO mo dependecies.
-    python3 -m pip install --force openvino==2021.4.2 openvino-dev==2021.4.2 --no-deps
-    python3 -m pip install sympy onnx # Additional dependecies.
-
-    # Patch OpenVINO.
-    mo_path=$(python3 -c 'import mo; import pathlib; print(pathlib.Path(mo.__path__[0]).parent.absolute())')
-    wget -O - "$MO_QDQ_PATCH_URL" | patch "${mo_path}/extensions/front/onnx/quantize_dequantize_linear.py"
-    wget -O - "$MO_LOADER_PATCH_URL" | patch "${mo_path}/extensions/load/onnx/loader.py"
+    python3 -m pip install networkx~=2.5 defusedxml~=0.7.1 # OpenVINO mo minimal dependecies.
+    python3 -m pip install --no-deps openvino==2022.1 openvino-dev==2022.1
 
     if [[ "$DEVICE_TYPE" == "GPU" ]]; then
-        python3 -m pip install nvidia-cuda-runtime-cu114==11.4.148 \
-                    nvidia-cudnn-cu114==8.2.4.15 \
-                    nvidia-cufft-cu114==10.5.2.100 \
-                    nvidia-curand-cu114==10.2.5.120 \
-                    nvidia-cublas-cu114==11.6.5.2 \
-                    --extra-index-url https://pypi.ngc.nvidia.com
+        python3 -m pip install --no-deps --extra-index-url https://pypi.ngc.nvidia.com \
+            nvidia-cuda-runtime-cu116==11.6.55 \
+            nvidia-cudnn-cu116==8.4.0.27 \
+            nvidia-cufft-cu116==10.7.2.124 \
+            nvidia-curand-cu116==10.2.9.124 \
+            nvidia-cublas-cu116==11.9.2.110 \
+            nvidia-tensorrt==8.4.3.1
 
-        # Symlinks for cublas package.
-        nvidia_dir="$(python3 -c 'import nvidia; print(next(iter(nvidia.__path__)))')"
-        cublas_lib_dir=$nvidia_dir/cublas/lib
-        ln -sf $cublas_lib_dir/libcublas.so.11 $cublas_lib_dir/libcublas.so
-        ln -sf $cublas_lib_dir/libcublasLt.so.11 $cublas_lib_dir/libcublasLt.so
-        ln -sf $cublas_lib_dir/libnvblas.so.11 $cublas_lib_dir/libnvblas.so
-
-        python3 -m pip install nvidia-tensorrt==8.4.1.5 --no-deps --extra-index-url https://pypi.ngc.nvidia.com
-        python3 -m pip install cuda-python
+        python3 -m pip install cuda-python~=11.6.0
     fi
 
     if [[ $python_version == "3.7"* ]]; then
-        python3 -m pip install -U --force $ORT_PY37_WHL_URL
+        python3 -m pip install --force-reinstall $ORT_PY37_x86_64_WHL_URL
     elif [[ $python_version == "3.8"* ]]; then
-        python3 -m pip install -U --force $ORT_PY38_WHL_URL
+        python3 -m pip install --force-reinstall $ORT_PY38_x86_64_WHL_URL
     elif [[ $python_version == "3.9"* ]]; then
-        python3 -m pip install -U --force $ORT_PY39_WHL_URL
-    fi
-
-    python3 -m pip install protobuf~=3.0 # Install protobuf 3.x.
-
-elif [[ $arch == "aarch64" ]]; then
-
-    declare -A supported_jetpacks=(["7.2"]="JetPack 4.6.2" ["7.1"]="JetPack 4.6.1" ["6.1"]="JetPack 4.6" ["5.1"]="JetPack 4.5")
-    latest_jetpack="7.2"
-    jetpack_revision="$(cat /etc/nv_tegra_release | sed 's/.*REVISION: \([^,]*\).*/\1/')"
-
-    if ! [[ "$python_version" =~ 3\.[6-8]\.* ]]; then
-        printf "Unsupported python version. Abort.\n"
-        exit 1
-    fi
-
-    # Update pip to latest version.
-    if [[ $python_version == "3.6"* ]]; then
-        wget -O - $PIP_UPDATE_URL_36 | python3
-    else
-        wget -O - $PIP_UPDATE_URL | python3
+        python3 -m pip install --force-reinstall $ORT_PY39_x86_64_WHL_URL
     fi
 
     # Install additional dependecies.
-    python3 -m pip install sympy packaging six protobuf~=3.0
+    python3 -m pip install onnx six protobuf~=3.0
 
-    if [[ $jetpack_revision == "7.2" || $jetpack_revision == "7.1" ]]; then
-        if [[ $python_version == "3.6"* ]]; then
-            python3 -m pip install $ORT_PY36_AARCH64_JP461_WHL_URL
-        elif [[ $python_version == "3.7"* ]]; then
-            python3 -m pip install $ORT_PY37_AARCH64_JP461_WHL_URL
-        elif [[ $python_version == "3.8"* ]]; then
-            python3 -m pip install $ORT_PY38_AARCH64_JP461_WHL_URL
-        fi
-    elif [[ $jetpack_revision == "6.1" ]]; then
-        if [[ $python_version == "3.6"* ]]; then
-            python3 -m pip install $ORT_PY36_AARCH64_JP46_WHL_URL
-        elif [[ $python_version == "3.7"* ]]; then
-            python3 -m pip install $ORT_PY37_AARCH64_JP46_WHL_URL
-        elif [[ $python_version == "3.8"* ]]; then
-            python3 -m pip install $ORT_PY38_AARCH64_JP46_WHL_URL
-        fi
-    elif [[ $jetpack_revision == "5.1" ]]; then
-        if [[ $python_version == "3.6"* ]]; then
-            python3 -m pip install $ORT_PY36_AARCH64_JP45_WHL_URL
-        elif [[ $python_version == "3.7"* ]]; then
-            python3 -m pip install $ORT_PY37_AARCH64_JP45_WHL_URL
-        elif [[ $python_version == "3.8"* ]]; then
-            python3 -m pip install $ORT_PY38_AARCH64_JP45_WHL_URL
-        fi
-        printf "Please update installed ${supported_jetpacks[$jetpack_revision]} to ${supported_jetpacks[$latest_jetpack]}.\n"
+elif [[ $arch == "aarch64" ]]; then
+
+    declare -A supported_jetpacks=(
+    	["35.1.0"]="JetPack 5.0.2" \
+    	["32.7.2"]="JetPack 4.6.2" \
+        ["32.7.1"]="JetPack 4.6.1" \
+        ["32.6.1"]="JetPack 4.6.0" \
+        ["32.5.1"]="JetPack 4.5.1" \
+    )
+
+    jetpack_release="$(cat /etc/nv_tegra_release | sed 's/.*R\([0-9][0-9]\).*/\1/')"
+    jetpack_revision="$(cat /etc/nv_tegra_release | sed 's/.*REVISION: \([^,]*\).*/\1/')"
+    jetpack_version="$jetpack_release.$jetpack_revision"
+
+    if [[ -v "supported_jetpacks[$jetpack_version]" ]]; then
+        printf "OS: ${supported_jetpacks[$jetpack_version]} ($jetpack_version)\n"
     else
         printf "Unsupported JetPack. Abort.\n"
         exit 1
+    fi
+
+    if [[ $jetpack_release == "35" ]]; then  # JetPack 5.x
+        if ! [[ "$python_version" == "3.8"* ]]; then
+            printf "Unsupported python version. Abort.\n"
+            exit 1
+        fi
+
+        # Update pip to latest version.
+        python3 -m pip install --upgrade pip
+
+        if [[ $jetpack_revision == "1.0" ]]; then  # JP 5.0.2 (35.1.0)
+            python3 -m pip install cuda-python~=11.6.0
+            python3 -m pip install $ONNXOPTIMIZER_PY38_AARCH64_WHL_URL
+            python3 -m pip install $TRT_PY38_AARCH64_JP_35_1_0_WHL_URL
+            python3 -m pip install --force-reinstall $ORT_PY38_AARCH64_JP_35_1_0_WHL_URL
+        else
+            printf "Unsupported JetPack. Abort.\n"
+            exit 1
+        fi
+
+        # Install additional dependecies.
+        python3 -m pip install six protobuf~=3.0
+
+    elif [[ $jetpack_release == "32" ]]; then  # JetPack 4.x
+        if ! [[ "$python_version" == "3.6"* ]]; then
+            printf "Unsupported python version. Abort.\n"
+            exit 1
+        fi
+
+        # Update pip to latest version.
+        wget -O - $PIP_UPDATE_URL_36 | python3
+
+        # Install ONNX Optimizer.
+        python3 -m pip install onnx~=1.11.0
+        python3 -m pip install $ONNXOPTIMIZER_PY36_AARCH64_WHL_URL
+
+        if [[ $jetpack_revision == "5.1" ]]; then  # JP 4.5.1 (32.5.1)
+            python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_5_1_WHL_URL
+        elif [[ $jetpack_revision == "6.1" ]]; then  # JP 4.6.0 (32.6.1)
+            python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_6_1_WHL_URL
+        elif [[ $jetpack_revision == "7.1" ]]; then  # JP 4.6.1 (32.7.1)
+            python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_7_1_WHL_URL
+        elif [[ $jetpack_revision == "7.2" ]]; then  # JP 4.6.2 (32.7.2)
+            python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_7_2_WHL_URL
+        else
+            printf "Unsupported JetPack. Abort.\n"
+            exit 1
+        fi
+
+        # Install additional dependecies.
+        python3 -m pip install sympy packaging six protobuf~=3.0
+
+        # Link nvidia-tensorrt package.
+        site_packages_dir="$(python3 -c 'import site; print(site.getsitepackages()[0])')"
+        if ! [[ "$site_packages_dir" == "/usr/local/lib/python3.6/dist-packages" ]]; then
+            ln -sf /usr/lib/python3.6/dist-packages/tensorrt $site_packages_dir
+        fi
     fi
 
 else
