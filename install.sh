@@ -164,6 +164,9 @@ elif [[ $arch == "aarch64" ]]; then
             python3 -m pip install $ONNXOPTIMIZER_PY38_AARCH64_WHL_URL
             python3 -m pip install $TRT_PY38_AARCH64_JP_35_1_0_WHL_URL
             python3 -m pip install --force-reinstall $ORT_PY38_AARCH64_JP_35_1_0_WHL_URL
+        else
+            printf "Unsupported JetPack. Abort.\n"
+            exit 1
         fi
 
         # Install additional dependecies.
@@ -190,6 +193,9 @@ elif [[ $arch == "aarch64" ]]; then
             python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_7_1_WHL_URL
         elif [[ $jetpack_revision == "7.2" ]]; then  # JP 4.6.2 (32.7.2)
             python3 -m pip install --force-reinstall $ORT_PY36_AARCH64_JP_32_7_2_WHL_URL
+        else
+            printf "Unsupported JetPack. Abort.\n"
+            exit 1
         fi
 
         # Install additional dependecies.
