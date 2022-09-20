@@ -114,8 +114,6 @@ if [[ $arch == "x86_64" ]]; then
             nvidia-curand-cu116==10.2.9.124 \
             nvidia-cublas-cu116==11.9.2.110 \
             nvidia-tensorrt==8.4.3.1
-
-        python3 -m pip install cuda-python~=11.6.0
     fi
 
     if [[ $python_version == "3.7"* ]]; then
@@ -127,7 +125,7 @@ if [[ $arch == "x86_64" ]]; then
     fi
 
     # Install additional dependecies.
-    python3 -m pip install onnx six protobuf~=3.0
+    python3 -m pip install onnx six protobuf~=3.0 cuda-python~=11.6.0
 
 elif [[ $arch == "aarch64" ]]; then
 
