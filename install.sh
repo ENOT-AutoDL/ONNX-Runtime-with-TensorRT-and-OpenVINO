@@ -104,7 +104,7 @@ if [[ $arch == "x86_64" ]]; then
     python3 -m pip install wheel
     # Install OpenVINO without redundant dependecies.
     python3 -m pip install networkx~=2.5 defusedxml~=0.7.1 # OpenVINO mo minimal dependecies.
-    python3 -m pip install --no-deps openvino==2022.1 openvino-dev==2022.1
+    python3 -m pip install --no-deps openvino==2022.1 openvino-dev==2022.1 'numpy<1.24.0'
 
     if [[ "$DEVICE_TYPE" == "GPU" ]]; then
         python3 -m pip install --no-deps --extra-index-url https://pypi.ngc.nvidia.com \
