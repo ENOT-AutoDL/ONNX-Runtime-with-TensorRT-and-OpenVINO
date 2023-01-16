@@ -2,7 +2,7 @@
 
 MANYLINUX_IMAGE='quay.io/pypa/manylinux_2_28_x86_64'
 PYTHON_TARGETS='cp37|cp38|cp39'
-THREADS_NUM=64
+THREADS_NUM=$(nproc)
 
 docker pull "$MANYLINUX_IMAGE"
 docker run -it --rm \

@@ -1,16 +1,16 @@
 diff --git a/setup.py b/setup.py
-index 0805a59..ab9128b 100644
+index 9ad5390..6291169 100644
 --- a/setup.py
 +++ b/setup.py
-@@ -102,6 +102,7 @@ manylinux_tags = [
-     "manylinux2014_ppc64le",
+@@ -103,6 +103,7 @@ manylinux_tags = [
      "manylinux2014_s390x",
      "manylinux_2_27_x86_64",
+     "manylinux_2_27_aarch64",
 +    "manylinux_2_28_x86_64",
  ]
  is_manylinux = environ.get("AUDITWHEEL_PLAT", None) in manylinux_tags
  
-@@ -141,33 +142,51 @@ try:
+@@ -142,33 +143,51 @@ try:
                  self.root_is_pure = False
  
          def _rewrite_ld_preload(self, to_preload):
@@ -80,7 +80,7 @@ index 0805a59..ab9128b 100644
  
          def run(self):
              if is_manylinux:
-@@ -189,6 +208,7 @@ try:
+@@ -190,6 +209,7 @@ try:
                  to_preload = []
                  to_preload_cuda = []
                  to_preload_tensorrt = []
@@ -88,7 +88,7 @@ index 0805a59..ab9128b 100644
                  cuda_dependencies = []
                  args = ["patchelf", "--debug"]
                  for line in result.stdout.split("\n"):
-@@ -259,18 +279,33 @@ try:
+@@ -260,18 +280,33 @@ try:
  
                  dest = "onnxruntime/capi/libonnxruntime_providers_openvino.so"
                  if path.isfile(dest):
@@ -125,7 +125,7 @@ index 0805a59..ab9128b 100644
                  assert self.dist_dir is not None
                  file = glob(path.join(self.dist_dir, "*linux*.whl"))[0]
                  logger.info("repairing %s for manylinux1", file)
-@@ -315,6 +350,7 @@ if platform.system() == "Linux":
+@@ -316,6 +351,7 @@ if platform.system() == "Linux":
      dl_libs = ["libonnxruntime_providers_shared.so"]
      dl_libs.append(providers_cuda_or_rocm)
      dl_libs.append(providers_tensorrt_or_migraphx)

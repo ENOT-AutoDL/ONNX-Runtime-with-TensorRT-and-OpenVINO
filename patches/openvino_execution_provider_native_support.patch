@@ -1,8 +1,8 @@
 diff --git a/include/onnxruntime/core/session/onnxruntime_c_api.h b/include/onnxruntime/core/session/onnxruntime_c_api.h
-index 24697f4..3ab3e9b 100644
+index 9bb58c4..089173b 100644
 --- a/include/onnxruntime/core/session/onnxruntime_c_api.h
 +++ b/include/onnxruntime/core/session/onnxruntime_c_api.h
-@@ -517,7 +517,8 @@ typedef struct OrtOpenVINOProviderOptions {
+@@ -518,7 +518,8 @@ typedef struct OrtOpenVINOProviderOptions {
  #ifdef __cplusplus
    OrtOpenVINOProviderOptions() : device_type{}, enable_vpu_fast_compile{}, device_id{},
                                   num_of_threads{}, use_compiled_network{}, blob_dump_path{},
@@ -12,7 +12,7 @@ index 24697f4..3ab3e9b 100644
  #endif
    /** \brief Device type string
    *
-@@ -532,6 +533,8 @@ typedef struct OrtOpenVINOProviderOptions {
+@@ -533,6 +534,8 @@ typedef struct OrtOpenVINOProviderOptions {
    void* context;
    unsigned char enable_opencl_throttling; ///< 0 = disabled, nonzero = enabled
    unsigned char enable_dynamic_shapes;  ///< 0 = disabled, nonzero = enabled
@@ -22,7 +22,7 @@ index 24697f4..3ab3e9b 100644
  
  struct OrtApi;
 diff --git a/onnxruntime/core/providers/openvino/backend_utils.cc b/onnxruntime/core/providers/openvino/backend_utils.cc
-index a044387..2382a93 100644
+index b5296be..61ae6d4 100644
 --- a/onnxruntime/core/providers/openvino/backend_utils.cc
 +++ b/onnxruntime/core/providers/openvino/backend_utils.cc
 @@ -6,6 +6,9 @@
@@ -34,16 +34,16 @@ index a044387..2382a93 100644
 +#include <filesystem>
  
  #include "ov_interface.h"
- #include <ngraph/frontend/onnx_import/onnx.hpp>
-@@ -180,45 +183,82 @@ CreateOVModel(const ONNX_NAMESPACE::ModelProto& model_proto, const GlobalContext
+ #include <ngraph/pass/convert_fp32_to_fp16.hpp>
+@@ -166,45 +169,83 @@ CreateOVModel(const ONNX_NAMESPACE::ModelProto& model_proto, const GlobalContext
    }
  #endif
  
 -  const std::string model = model_proto.SerializeAsString();
 -  auto cnn_network = global_context.ie_core.ReadModel(model);
 -
--  if (global_context.device_type.find("GPU") != std::string::npos &&
--      subgraph_context.precision == InferenceEngine::Precision::FP16) {
+-  if ((subgraph_context.precision == InferenceEngine::Precision::FP16) &&
+-      (global_context.device_type.find("MYRIAD") == std::string::npos)) {
 -    //FP16 transformations
 -    ov::pass::ConvertFP32ToFP16 pass_obj;
 -    pass_obj.run_on_model(cnn_network);
@@ -56,6 +56,7 @@ index a044387..2382a93 100644
 -        proc.input(i).preprocess().convert_element_type(ov::element::f16);
 +  std::shared_ptr<ov::Model> cnn_network;
 +  bool is_network_optimized = false;
++
 +  if (global_context.enable_optimization) {
 +    try {
 +      const std::string workdir = global_context.optimization_workdir;
@@ -88,16 +89,13 @@ index a044387..2382a93 100644
 +      is_network_optimized = false;
      }
 +  }
- 
--    for (size_t i=0; i < cnn_network->outputs().size(); i++) {
--      if(cnn_network->outputs()[i].get_element_type() == ov::element::f16) {
--        proc.output(i).postprocess().convert_element_type(ov::element::f32);
++
 +  if (not global_context.enable_optimization or (global_context.enable_optimization and not is_network_optimized)) {
 +    const std::string model = model_proto.SerializeAsString();
 +    cnn_network = global_context.ie_core.ReadModel(model);
 +
-+    if (global_context.device_type.find("GPU") != std::string::npos &&
-+        subgraph_context.precision == InferenceEngine::Precision::FP16) {
++    if ((subgraph_context.precision == InferenceEngine::Precision::FP16) &&
++        (global_context.device_type.find("MYRIAD") == std::string::npos)) {
 +      //FP16 transformations
 +      ov::pass::ConvertFP32ToFP16 pass_obj;
 +      pass_obj.run_on_model(cnn_network);
@@ -109,13 +107,16 @@ index a044387..2382a93 100644
 +          proc.input(i).tensor().set_element_type(ov::element::f32);
 +          proc.input(i).preprocess().convert_element_type(ov::element::f16);
 +        }
-       }
-+
++      }
+ 
+-    for (size_t i=0; i < cnn_network->outputs().size(); i++) {
+-      if(cnn_network->outputs()[i].get_element_type() == ov::element::f16) {
+-        proc.output(i).postprocess().convert_element_type(ov::element::f32);
 +      for (size_t i=0; i < cnn_network->outputs().size(); i++) {
 +        if(cnn_network->outputs()[i].get_element_type() == ov::element::f16) {
 +          proc.output(i).postprocess().convert_element_type(ov::element::f32);
 +        }
-+      }
+       }
 +      cnn_network = proc.build();
      }
 -    cnn_network = proc.build();
@@ -127,18 +128,17 @@ index a044387..2382a93 100644
 -    pass_const_obj.run_on_model(cnn_network);
 -    auto& results = const_cast<ov::ResultVector&>(cnn_network.get()->get_results());
 -    size_t index = results.size() - 1;
-- 
--    for (auto it = results.rbegin(); it != results.rend(); ++it) {
--      if (auto const_node = std::dynamic_pointer_cast<ngraph::op::Constant>((*it)->input_value(0).get_node_shared_ptr())) {
--        const_outputs_map[(*it)->get_friendly_name()] = const_node;
--        results.erase(results.begin() + index);
 +    //Check for Constant Folding
 +    if (!global_context.is_wholly_supported_graph) {
 +      ov::pass::ConstantFolding pass_const_obj;
 +      pass_const_obj.run_on_model(cnn_network);
 +      auto& results = const_cast<ov::ResultVector&>(cnn_network.get()->get_results());
 +      size_t index = results.size() - 1;
-+
+ 
+-    for (auto it = results.rbegin(); it != results.rend(); ++it) {
+-      if (auto const_node = std::dynamic_pointer_cast<ngraph::op::Constant>((*it)->input_value(0).get_node_shared_ptr())) {
+-        const_outputs_map[(*it)->get_friendly_name()] = const_node;
+-        results.erase(results.begin() + index);
 +      for (auto it = results.rbegin(); it != results.rend(); ++it) {
 +        if (auto const_node = std::dynamic_pointer_cast<ngraph::op::Constant>((*it)->input_value(0).get_node_shared_ptr())) {
 +          const_outputs_map[(*it)->get_friendly_name()] = const_node;
@@ -164,7 +164,7 @@ index 6833758..cfbecce 100644
  
  // Holds context specific to subgraph.
 diff --git a/onnxruntime/core/providers/openvino/openvino_execution_provider.cc b/onnxruntime/core/providers/openvino/openvino_execution_provider.cc
-index 16bd721..21cfed6 100644
+index c8876cb..05dc331 100644
 --- a/onnxruntime/core/providers/openvino/openvino_execution_provider.cc
 +++ b/onnxruntime/core/providers/openvino/openvino_execution_provider.cc
 @@ -17,7 +17,9 @@ OpenVINOExecutionProvider::OpenVINOExecutionProvider(const OpenVINOExecutionProv
@@ -178,7 +178,7 @@ index 16bd721..21cfed6 100644
    openvino_ep::BackendManager::GetGlobalContext().enable_opencl_throttling = info.enable_opencl_throttling_;
    openvino_ep::BackendManager::GetGlobalContext().enable_dynamic_shapes = info.enable_dynamic_shapes_;
 diff --git a/onnxruntime/core/providers/openvino/openvino_execution_provider.h b/onnxruntime/core/providers/openvino/openvino_execution_provider.h
-index f8b949f..f8f209b 100644
+index e32142c..dce428e 100644
 --- a/onnxruntime/core/providers/openvino/openvino_execution_provider.h
 +++ b/onnxruntime/core/providers/openvino/openvino_execution_provider.h
 @@ -61,14 +61,18 @@ struct OpenVINOExecutionProviderInfo {
@@ -202,7 +202,7 @@ index f8b949f..f8f209b 100644
      if (dev_type == "") {
        LOGS_DEFAULT(INFO) << "[OpenVINO-EP]"
                           << "No runtime device selection option provided.";
-@@ -136,7 +140,7 @@ struct OpenVINOExecutionProviderInfo {
+@@ -154,7 +158,7 @@ struct OpenVINOExecutionProviderInfo {
                         << "Choosing Device: " << device_type_ << " , Precision: " << precision_;
    }
    OpenVINOExecutionProviderInfo() {
@@ -273,7 +273,7 @@ index 01f2552..fc4b874 100644
  
    void Initialize() override {
 diff --git a/onnxruntime/core/providers/openvino/ov_interface.cc b/onnxruntime/core/providers/openvino/ov_interface.cc
-index 0495482..6bcab4f 100644
+index 782e11e..9f95a06 100644
 --- a/onnxruntime/core/providers/openvino/ov_interface.cc
 +++ b/onnxruntime/core/providers/openvino/ov_interface.cc
 @@ -38,7 +38,19 @@ namespace onnxruntime {
@@ -298,31 +298,24 @@ index 0495482..6bcab4f 100644
          try {
              #if defined (OV_API_20)
 diff --git a/onnxruntime/core/providers/openvino/ov_interface.h b/onnxruntime/core/providers/openvino/ov_interface.h
-index d306df3..bf26113 100644
+index 58ff27b..a24efb3 100644
 --- a/onnxruntime/core/providers/openvino/ov_interface.h
 +++ b/onnxruntime/core/providers/openvino/ov_interface.h
-@@ -58,6 +58,9 @@ class OVExeNetwork;
+@@ -62,6 +62,9 @@ class OVExeNetwork;
    #endif
      public:
-         std::shared_ptr<OVNetwork> ReadModel(const std::string& model_stream) const;             
+         std::shared_ptr<OVNetwork> ReadModel(const std::string& model_stream) const;
 +        #if defined (OV_API_20)
 +        std::shared_ptr<OVNetwork> ReadModel(const std::string& model_stream, const std::string& weights) const;
 +        #endif
          OVExeNetwork LoadNetwork(std::shared_ptr<OVNetwork>& ie_cnn_network, std::string& hw_target, OVConfig config, std::string name);
          OVExeNetwork ImportModel(const std::string& compiled_blob, std::string hw_target, std::string name);
          void SetCache(std::string cache_dir_path);
-@@ -122,4 +125,4 @@ class OVExeNetwork;
-     #endif
-     };
-    }
--}
-\ No newline at end of file
-+}
 diff --git a/onnxruntime/python/onnxruntime_pybind_state.cc b/onnxruntime/python/onnxruntime_pybind_state.cc
-index 94ae844..fb05875 100644
+index 5701007..938dace 100644
 --- a/onnxruntime/python/onnxruntime_pybind_state.cc
 +++ b/onnxruntime/python/onnxruntime_pybind_state.cc
-@@ -591,6 +591,7 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
+@@ -603,6 +603,7 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
      OrtOpenVINOProviderOptions params;
      params.device_type = openvino_device_type.c_str();
      std::string blob_dump_path;
@@ -330,7 +323,7 @@ index 94ae844..fb05875 100644
  
      auto it = provider_options_map.find(type);
      if (it != provider_options_map.end()) {
-@@ -639,6 +640,17 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
+@@ -651,6 +652,17 @@ std::unique_ptr<IExecutionProvider> CreateExecutionProviderInstance(
          } else if (option.first == "blob_dump_path") {
            blob_dump_path = option.second;
            params.blob_dump_path = blob_dump_path.c_str();

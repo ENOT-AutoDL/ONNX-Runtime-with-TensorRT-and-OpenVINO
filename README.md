@@ -34,20 +34,21 @@ Wheels compiled for `x86_64` architecture depend on the following packages from 
  - `nvidia-cudnn-cu116 (8.4)`
  - `nvidia-cufft-cu116 (10.7)`
  - `nvidia-curand-cu116 (10.2)`
- - `nvidia-tensorrt (8.4)`
+ - `tensorrt (8.5)`
 
-and `openvino (2022.1)` from standard PyPI repository.\
+and `openvino (2022.2)` from standard PyPI repository.\
 Compiled wheels do not explicitly depend on NVIDIA packages, you can install them by the following commands:
 ```
-pip install --no-deps --extra-index-url https://pypi.ngc.nvidia.com \
+pip install --extra-index-url https://pypi.ngc.nvidia.com \
     nvidia-cuda-runtime-cu116==11.6.55 \
     nvidia-cudnn-cu116==8.4.0.27 \
     nvidia-cufft-cu116==10.7.2.124 \
     nvidia-curand-cu116==10.2.9.124 \
-    nvidia-cublas-cu116==11.9.2.110 \
-    nvidia-tensorrt==8.4.3.1
+    nvidia-cublas-cu116==11.9.2.110
 
-pip install openvino==2022.1 openvino-dev==2022.1
+pip install --no-deps --extra-index-url https://pypi.ngc.nvidia.com tensorrt==8.5.2.2
+
+pip install openvino==2022.2 openvino-dev==2022.2
 ```
 
 The **recommended way** to install this ONNX Runtime package is to use our `install.sh` script,
