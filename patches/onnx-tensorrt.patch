@@ -1,17 +1,13 @@
 diff --git a/ModelImporter.cpp b/ModelImporter.cpp
-index 93c5614..393d187 100644
+index 720f4ce..5cd61db 100644
 --- a/ModelImporter.cpp
 +++ b/ModelImporter.cpp
-@@ -509,10 +509,10 @@ bool ModelImporter::supportsOperator(const char* op_name) const
- 
-     if (is("NonMaxSuppression"))
+@@ -467,7 +467,7 @@ bool ModelImporter::supportsOperator(char const* op_name) const
+     // Disable nodes that rely on DDS as ONNXRuntime does not support it at the moment
+     if (is("NonMaxSuppression") || is("NonZero") || is("RoiAlign"))
      {
 -        return false;
 +        return true;
      }
-     if (is("EfficientNMS_TRT") || is("PyramidROIAlign_TRT") || is("MultilevelCropAndResize_TRT")
--        || is("DisentangledAttention_TRT"))
-+        || is("DisentangledAttention_TRT") || is("RoiAlign"))
-     {
-         return true;
-     }
+     return _op_importers.count(op_name);
+ }
