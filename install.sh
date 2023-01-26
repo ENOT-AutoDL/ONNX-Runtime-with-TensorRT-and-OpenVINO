@@ -39,9 +39,9 @@ REPO_RAW_URL="https://raw.githubusercontent.com/ENOT-AutoDL/ONNX-Runtime-with-Te
 MASTER_URL="${REPO_RAW_URL}/master"
 
 # x86_64
-ORT_PY37_x86_64_WHL_URL="${RELEASES_URL}/v1.12.1/onnxruntime_gpu-1.12.1-cp37-cp37m-manylinux_2_28_x86_64.whl"
-ORT_PY38_x86_64_WHL_URL="${RELEASES_URL}/v1.12.1/onnxruntime_gpu-1.12.1-cp38-cp38-manylinux_2_28_x86_64.whl"
-ORT_PY39_x86_64_WHL_URL="${RELEASES_URL}/v1.12.1/onnxruntime_gpu-1.12.1-cp39-cp39-manylinux_2_28_x86_64.whl"
+ORT_PY37_x86_64_WHL_URL="${RELEASES_URL}/v1.13.1/onnxruntime_gpu-1.13.1-cp37-cp37m-manylinux_2_28_x86_64.whl"
+ORT_PY38_x86_64_WHL_URL="${RELEASES_URL}/v1.13.1/onnxruntime_gpu-1.13.1-cp38-cp38-manylinux_2_28_x86_64.whl"
+ORT_PY39_x86_64_WHL_URL="${RELEASES_URL}/v1.13.1/onnxruntime_gpu-1.13.1-cp39-cp39-manylinux_2_28_x86_64.whl"
 
 # JP 4.5.1 (32.5.1)
 ORT_PY36_AARCH64_JP_32_5_1_WHL_URL="${RELEASES_URL}/v1.8.2_JetPack4.5/onnxruntime_gpu_tensorrt-1.8.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl"
@@ -103,17 +103,17 @@ if [[ $arch == "x86_64" ]]; then
     python3 -m pip install --upgrade pip
     python3 -m pip install wheel
     # Install OpenVINO without redundant dependecies.
-    python3 -m pip install networkx~=2.5 defusedxml~=0.7.1 # OpenVINO mo minimal dependecies.
-    python3 -m pip install --no-deps openvino==2022.1 openvino-dev==2022.1 'numpy<1.24.0'
+    python3 -m pip install 'networkx<2.8.1' defusedxml~=0.7.1 # OpenVINO mo minimal dependecies.
+    python3 -m pip install --no-deps openvino==2022.2 openvino-dev==2022.2
 
     if [[ "$DEVICE_TYPE" == "GPU" ]]; then
-        python3 -m pip install --no-deps --extra-index-url https://pypi.ngc.nvidia.com \
+        python3 -m pip install --extra-index-url https://pypi.ngc.nvidia.com \
             nvidia-cuda-runtime-cu116==11.6.55 \
             nvidia-cudnn-cu116==8.4.0.27 \
             nvidia-cufft-cu116==10.7.2.124 \
             nvidia-curand-cu116==10.2.9.124 \
-            nvidia-cublas-cu116==11.9.2.110 \
-            nvidia-tensorrt==8.4.3.1
+            nvidia-cublas-cu116==11.9.2.110
+        python3 -m pip install --no-deps --extra-index-url https://pypi.ngc.nvidia.com tensorrt==8.5.2.2
     fi
 
     if [[ $python_version == "3.7"* ]]; then
@@ -125,7 +125,7 @@ if [[ $arch == "x86_64" ]]; then
     fi
 
     # Install additional dependecies.
-    python3 -m pip install onnx six protobuf~=3.0 cuda-python~=11.6.0
+    python3 -m pip install onnx six protobuf~=3.0 cuda-python~=11.6.0 'numpy<1.23.1'
 
 elif [[ $arch == "aarch64" ]]; then
 
