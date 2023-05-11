@@ -125,7 +125,7 @@ if [[ $arch == "x86_64" ]]; then
     fi
 
     # Install additional dependecies.
-    python3 -m pip install onnx six protobuf~=3.0 cuda-python~=11.6.0 'numpy<1.23.1'
+    python3 -m pip install six protobuf~=3.0 cuda-python~=11.6.0 'onnx<1.14' 'numpy<1.23.1'
 
 elif [[ $arch == "aarch64" ]]; then
 
